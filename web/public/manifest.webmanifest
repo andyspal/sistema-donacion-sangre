@@ -1,0 +1,13 @@
+{
+  "name": "HemoRed — Donación de sangre",
+  "short_name": "HemoRed",
+  "description": "Orientación previa, turnos y convocatorias para donantes de sangre.",
+  "lang": "es-AR",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#0a0c0f",
+  "theme_color": "#0a0c0f",
+  "icons": [
+    { "src": "/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

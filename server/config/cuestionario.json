@@ -1,0 +1,178 @@
+{
+  "version": "2026.10",
+  "titulo": "Cuestionario de salud pre-donación",
+  "descripcion": "Tus respuestas tienen carácter de declaración jurada y se guardan cifradas. Solo las usamos para orientarte y para el personal sanitario autorizado.",
+  "secciones": [
+    {
+      "id": "hoy",
+      "titulo": "Cómo estás hoy",
+      "preguntas": [
+        {
+          "id": "peso_kg",
+          "tipo": "numero",
+          "texto": "¿Cuánto pesás?",
+          "unidad": "kg",
+          "min": 30,
+          "max": 250
+        },
+        {
+          "id": "se_siente_bien",
+          "tipo": "si_no",
+          "texto": "¿Te sentís bien de salud, sin fiebre, resfrío ni malestar?"
+        },
+        {
+          "id": "infeccion_reciente",
+          "tipo": "si_no",
+          "texto": "En las últimas 2 semanas, ¿tuviste fiebre o alguna infección, o tomaste antibióticos?"
+        },
+        {
+          "id": "infeccion_fecha",
+          "tipo": "fecha",
+          "texto": "¿Qué día te recuperaste o terminaste el tratamiento?",
+          "mostrarSi": { "pregunta": "infeccion_reciente", "igual": true },
+          "noFutura": true
+        }
+      ]
+    },
+    {
+      "id": "ultimo_anio",
+      "titulo": "En los últimos 12 meses",
+      "preguntas": [
+        {
+          "id": "tatuaje",
+          "tipo": "si_no",
+          "texto": "¿Te hiciste tatuajes, piercings, micropigmentación o acupuntura?"
+        },
+        {
+          "id": "tatuaje_fecha",
+          "tipo": "fecha",
+          "texto": "¿Cuándo fue el último?",
+          "mostrarSi": { "pregunta": "tatuaje", "igual": true },
+          "noFutura": true
+        },
+        {
+          "id": "cirugia",
+          "tipo": "si_no",
+          "texto": "¿Tuviste alguna cirugía o endoscopía?"
+        },
+        {
+          "id": "cirugia_tipo",
+          "tipo": "opcion",
+          "texto": "¿De qué tipo?",
+          "mostrarSi": { "pregunta": "cirugia", "igual": true },
+          "opciones": [
+            { "valor": "mayor", "texto": "Cirugía mayor (con internación)" },
+            { "valor": "menor", "texto": "Cirugía menor o ambulatoria" },
+            { "valor": "endoscopia", "texto": "Endoscopía o colonoscopía" }
+          ]
+        },
+        {
+          "id": "cirugia_fecha",
+          "tipo": "fecha",
+          "texto": "¿En qué fecha?",
+          "mostrarSi": { "pregunta": "cirugia", "igual": true },
+          "noFutura": true
+        },
+        {
+          "id": "transfusion",
+          "tipo": "si_no",
+          "texto": "¿Recibiste una transfusión de sangre o hemocomponentes?"
+        },
+        {
+          "id": "transfusion_fecha",
+          "tipo": "fecha",
+          "texto": "¿En qué fecha?",
+          "mostrarSi": { "pregunta": "transfusion", "igual": true },
+          "noFutura": true
+        },
+        {
+          "id": "viaje_endemico",
+          "tipo": "si_no",
+          "texto": "¿Viajaste a zonas con paludismo (malaria)?",
+          "ayuda": "Por ejemplo: regiones de África subsahariana, Amazonía o sudeste asiático."
+        },
+        {
+          "id": "viaje_fecha",
+          "tipo": "fecha",
+          "texto": "¿Qué día regresaste?",
+          "mostrarSi": { "pregunta": "viaje_endemico", "igual": true },
+          "noFutura": true
+        },
+        {
+          "id": "practicas_riesgo",
+          "tipo": "si_no",
+          "texto": "¿Tuviste relaciones sexuales sin preservativo con parejas ocasionales o nuevas?",
+          "ayuda": "Se evalúan prácticas, no orientaciones ni identidades."
+        }
+      ]
+    },
+    {
+      "id": "otros",
+      "titulo": "Odontología, medicación y antecedentes",
+      "preguntas": [
+        {
+          "id": "odontologia",
+          "tipo": "si_no",
+          "texto": "En la última semana, ¿te hiciste una extracción dental o un tratamiento de conducto?"
+        },
+        {
+          "id": "odontologia_fecha",
+          "tipo": "fecha",
+          "texto": "¿En qué fecha?",
+          "mostrarSi": { "pregunta": "odontologia", "igual": true },
+          "noFutura": true
+        },
+        {
+          "id": "medicacion",
+          "tipo": "multiple",
+          "texto": "¿Tomás alguna de estas medicaciones?",
+          "exclusiva": "ninguna",
+          "opciones": [
+            { "valor": "ninguna", "texto": "Ninguna / solo anticonceptivos o vitaminas" },
+            { "valor": "aspirina", "texto": "Aspirina o antiinflamatorios (últimos 3 días)" },
+            { "valor": "anticoagulantes", "texto": "Anticoagulantes" },
+            { "valor": "isotretinoina", "texto": "Isotretinoína, finasteride o dutasteride" },
+            { "valor": "otra", "texto": "Otra medicación habitual" }
+          ]
+        },
+        {
+          "id": "antecedentes",
+          "tipo": "multiple",
+          "texto": "¿Tenés o tuviste alguna de estas condiciones?",
+          "exclusiva": "ninguna",
+          "opciones": [
+            { "valor": "ninguna", "texto": "Ninguna" },
+            { "valor": "hepatitis", "texto": "Hepatitis B o C" },
+            { "valor": "vih", "texto": "VIH" },
+            { "valor": "chagas", "texto": "Enfermedad de Chagas" },
+            { "valor": "cancer", "texto": "Cáncer" },
+            { "valor": "cardiaca", "texto": "Enfermedad cardíaca o ACV" },
+            { "valor": "diabetes_insulina", "texto": "Diabetes con insulina" },
+            { "valor": "epilepsia", "texto": "Epilepsia o convulsiones" },
+            { "valor": "coagulacion", "texto": "Trastornos de la coagulación" }
+          ]
+        },
+        {
+          "id": "embarazo",
+          "tipo": "opcion",
+          "texto": "Embarazo y lactancia",
+          "soloSexo": "F",
+          "opciones": [
+            { "valor": "no", "texto": "No aplica" },
+            { "valor": "actual", "texto": "Estoy embarazada" },
+            { "valor": "reciente", "texto": "Parto, cesárea o pérdida en los últimos 12 meses" },
+            { "valor": "lactancia", "texto": "Estoy amamantando" }
+          ]
+        },
+        {
+          "id": "embarazo_fecha",
+          "tipo": "fecha",
+          "texto": "¿En qué fecha fue?",
+          "soloSexo": "F",
+          "mostrarSi": { "pregunta": "embarazo", "igual": "reciente" },
+          "noFutura": true
+        }
+      ]
+    }
+  ]
+}

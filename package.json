@@ -1,0 +1,20 @@
+{
+  "name": "sistema-donacion-sangre",
+  "private": true,
+  "description": "MVP — Sistema Web Inteligente para la Gestión Digital de Donantes de Sangre",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c red,green \"npm:dev -w server\" \"npm:dev -w web\"",
+    "build": "npm run build -w web",
+    "start": "npm start -w server",
+    "seed": "npm run seed -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
+    "test": "npm test -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5"
+  }
+}

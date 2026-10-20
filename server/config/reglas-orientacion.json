@@ -1,0 +1,229 @@
+{
+  "version": "2026.10-mvp",
+  "descripcion": "Reglas orientativas pre-donación (RF07, RF08, RNF11). Se editan sin tocar el código: el motor relee este archivo cuando cambia. Los plazos son valores de referencia del MVP y deben ser validados por el equipo médico contra la Res. 536/2026.",
+  "parametros": {
+    "intervalos": {
+      "M": { "dias_minimos": 56, "maximo_anual": 4 },
+      "F": { "dias_minimos": 84, "maximo_anual": 3 }
+    },
+    "ventana_anual_dias": 365,
+    "vigencia_estudios_meses": 6
+  },
+  "reglas": [
+    {
+      "id": "EDAD_MAXIMA",
+      "condicion": { "hecho": "edad", "op": ">", "valor": 65 },
+      "resultado": "REVISION_MEDICA",
+      "mensaje": "Por tu edad, la posibilidad de donar la define el profesional del centro."
+    },
+    {
+      "id": "EDAD_MENOR_18",
+      "condicion": { "hecho": "edad", "op": "<", "valor": 18 },
+      "resultado": "AVISO",
+      "mensaje": "Al ser menor de 18 años vas a necesitar la autorización de tu madre, padre o tutor."
+    },
+    {
+      "id": "PESO_MINIMO",
+      "condicion": { "hecho": "peso_kg", "op": "<", "valor": 50 },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Para donar sangre se requiere un peso mínimo de 50 kg."
+    },
+    {
+      "id": "MALESTAR_ACTUAL",
+      "condicion": { "hecho": "se_siente_bien", "op": "=", "valor": false },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Esperá a sentirte completamente bien antes de donar."
+    },
+    {
+      "id": "INFECCION_RECIENTE",
+      "condicion": { "hecho": "infeccion_fecha", "op": "hace_menos_de", "valor": { "dias": 14 } },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "infeccion_fecha", "sumar": { "dias": 14 } },
+      "mensaje": "Pasaron menos de 2 semanas desde una infección o un tratamiento con antibióticos."
+    },
+    {
+      "id": "TATUAJE_PIERCING",
+      "condicion": { "hecho": "tatuaje_fecha", "op": "hace_menos_de", "valor": { "meses": 12 } },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "tatuaje_fecha", "sumar": { "meses": 12 } },
+      "mensaje": "Tatuajes, piercings, micropigmentación y acupuntura requieren esperar 12 meses."
+    },
+    {
+      "id": "CIRUGIA_MAYOR",
+      "condicion": {
+        "todas": [
+          { "hecho": "cirugia_tipo", "op": "=", "valor": "mayor" },
+          { "hecho": "cirugia_fecha", "op": "hace_menos_de", "valor": { "meses": 6 } }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "cirugia_fecha", "sumar": { "meses": 6 } },
+      "mensaje": "Después de una cirugía mayor hay que esperar 6 meses."
+    },
+    {
+      "id": "CIRUGIA_MENOR",
+      "condicion": {
+        "todas": [
+          { "hecho": "cirugia_tipo", "op": "=", "valor": "menor" },
+          { "hecho": "cirugia_fecha", "op": "hace_menos_de", "valor": { "meses": 1 } }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "cirugia_fecha", "sumar": { "meses": 1 } },
+      "mensaje": "Después de una cirugía menor hay que esperar 1 mes."
+    },
+    {
+      "id": "ENDOSCOPIA",
+      "condicion": {
+        "todas": [
+          { "hecho": "cirugia_tipo", "op": "=", "valor": "endoscopia" },
+          { "hecho": "cirugia_fecha", "op": "hace_menos_de", "valor": { "meses": 6 } }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "cirugia_fecha", "sumar": { "meses": 6 } },
+      "mensaje": "Después de una endoscopía hay que esperar 6 meses."
+    },
+    {
+      "id": "TRANSFUSION",
+      "condicion": { "hecho": "transfusion_fecha", "op": "hace_menos_de", "valor": { "meses": 12 } },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "transfusion_fecha", "sumar": { "meses": 12 } },
+      "mensaje": "Después de recibir una transfusión hay que esperar 12 meses."
+    },
+    {
+      "id": "VIAJE_PALUDISMO",
+      "condicion": { "hecho": "viaje_fecha", "op": "hace_menos_de", "valor": { "meses": 12 } },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "viaje_fecha", "sumar": { "meses": 12 } },
+      "mensaje": "Tras un viaje a zonas con paludismo hay que esperar 12 meses desde el regreso."
+    },
+    {
+      "id": "PRACTICAS_RIESGO",
+      "condicion": { "hecho": "practicas_riesgo", "op": "=", "valor": true },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Hay que esperar 12 meses desde la última práctica sexual de riesgo."
+    },
+    {
+      "id": "ODONTOLOGIA",
+      "condicion": { "hecho": "odontologia_fecha", "op": "hace_menos_de", "valor": { "dias": 7 } },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "odontologia_fecha", "sumar": { "dias": 7 } },
+      "mensaje": "Después de una extracción dental o tratamiento de conducto hay que esperar 7 días."
+    },
+    {
+      "id": "ANTICOAGULANTES",
+      "condicion": { "hecho": "medicacion", "op": "incluye", "valor": "anticoagulantes" },
+      "resultado": "REVISION_MEDICA",
+      "mensaje": "El uso de anticoagulantes debe evaluarlo un profesional antes de donar."
+    },
+    {
+      "id": "TERATOGENICOS",
+      "condicion": { "hecho": "medicacion", "op": "incluye", "valor": "isotretinoina" },
+      "resultado": "REVISION_MEDICA",
+      "mensaje": "Algunas medicaciones (isotretinoína, finasteride, dutasteride) requieren un plazo que define el profesional."
+    },
+    {
+      "id": "ASPIRINA",
+      "condicion": { "hecho": "medicacion", "op": "incluye", "valor": "aspirina" },
+      "resultado": "AVISO",
+      "mensaje": "La aspirina no impide donar sangre entera, pero sí plaquetas por aféresis."
+    },
+    {
+      "id": "OTRA_MEDICACION",
+      "condicion": { "hecho": "medicacion", "op": "incluye", "valor": "otra" },
+      "resultado": "AVISO",
+      "mensaje": "Llevá el nombre de tu medicación: el profesional va a confirmar si es compatible."
+    },
+    {
+      "id": "ANTECEDENTES",
+      "condicion": {
+        "hecho": "antecedentes",
+        "op": "incluye_alguno",
+        "valor": ["hepatitis", "vih", "chagas", "cancer", "cardiaca", "diabetes_insulina", "epilepsia", "coagulacion"]
+      },
+      "resultado": "REVISION_MEDICA",
+      "mensaje": "Declaraste un antecedente de salud que un profesional debe evaluar antes de donar."
+    },
+    {
+      "id": "EMBARAZO_ACTUAL",
+      "condicion": { "hecho": "embarazo", "op": "=", "valor": "actual" },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Durante el embarazo no es posible donar."
+    },
+    {
+      "id": "EMBARAZO_RECIENTE",
+      "condicion": {
+        "todas": [
+          { "hecho": "embarazo", "op": "=", "valor": "reciente" },
+          { "hecho": "embarazo_fecha", "op": "hace_menos_de", "valor": { "meses": 6 } }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "habilitacion": { "desde": "embarazo_fecha", "sumar": { "meses": 6 } },
+      "mensaje": "Después de un parto, cesárea o pérdida hay que esperar 6 meses."
+    },
+    {
+      "id": "LACTANCIA",
+      "condicion": { "hecho": "embarazo", "op": "=", "valor": "lactancia" },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Durante la lactancia no es posible donar."
+    },
+    {
+      "id": "HEMOGLOBINA_BAJA_M",
+      "condicion": {
+        "todas": [
+          { "hecho": "sexo", "op": "=", "valor": "M" },
+          { "hecho": "lab.hemoglobina", "op": "<", "valor": 13.0 }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Tu hemoglobina en el estudio adjunto está por debajo del valor requerido para donar (13 g/dL)."
+    },
+    {
+      "id": "HEMOGLOBINA_BAJA_F",
+      "condicion": {
+        "todas": [
+          { "hecho": "sexo", "op": "=", "valor": "F" },
+          { "hecho": "lab.hemoglobina", "op": "<", "valor": 12.5 }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Tu hemoglobina en el estudio adjunto está por debajo del valor requerido para donar (12,5 g/dL)."
+    },
+    {
+      "id": "HEMATOCRITO_BAJO_M",
+      "condicion": {
+        "todas": [
+          { "hecho": "sexo", "op": "=", "valor": "M" },
+          { "hecho": "lab.hematocrito", "op": "<", "valor": 39 }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Tu hematocrito en el estudio adjunto está por debajo del valor requerido (39 %)."
+    },
+    {
+      "id": "HEMATOCRITO_BAJO_F",
+      "condicion": {
+        "todas": [
+          { "hecho": "sexo", "op": "=", "valor": "F" },
+          { "hecho": "lab.hematocrito", "op": "<", "valor": 38 }
+        ]
+      },
+      "resultado": "DIFERIMIENTO_TEMPORAL",
+      "mensaje": "Tu hematocrito en el estudio adjunto está por debajo del valor requerido (38 %)."
+    },
+    {
+      "id": "PLAQUETAS_BAJAS",
+      "condicion": { "hecho": "lab.plaquetas", "op": "<", "valor": 150000 },
+      "resultado": "REVISION_MEDICA",
+      "mensaje": "El recuento de plaquetas de tu estudio requiere revisión médica."
+    },
+    {
+      "id": "SEROLOGIA_REACTIVA",
+      "condicion": { "hecho": "lab.serologia_reactiva", "op": "=", "valor": true },
+      "resultado": "REVISION_MEDICA",
+      "mensaje": "Uno de tus estudios presenta un resultado serológico que debe evaluar un profesional."
+    }
+  ]
+}

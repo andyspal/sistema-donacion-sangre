@@ -1,0 +1,8 @@
+node_modules/
+web/dist/
+server/data/
+*.log
+.env
+
+# Documentos de la cátedra (no se versionan)
+/*.pdf
