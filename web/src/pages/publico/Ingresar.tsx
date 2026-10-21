@@ -66,7 +66,7 @@ export function Ingresar() {
           ¿Todavía no tenés cuenta? <Link to="/registro" className="text-lima hover:underline">Registrate como donante</Link>
         </p>
 
-        <details className="mt-8 rounded-xl border border-dashed border-borde p-3 text-sm">
+        <details className="mt-8 rounded-lg border border-dashed border-borde p-3 text-sm">
           <summary className="cursor-pointer text-tenue">Cuentas de demostración</summary>
           <ul className="mt-3 grid gap-2">
             {DEMO.map(([e, c, d]) => (

@@ -52,7 +52,7 @@ function CampoPregunta({ p, valor, onChange, error }: { p: Pregunta; valor: unkn
             const activa = valor === o.valor;
             return (
               <button key={o.valor} type="button" role="radio" aria-checked={activa} onClick={() => onChange(o.valor)}
-                className={cx('flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left text-sm transition cursor-pointer',
+                className={cx('flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-left text-sm transition cursor-pointer',
                   activa ? 'border-lima/60 bg-lima-suave' : error ? 'border-sangre' : 'border-borde hover:border-tenue/50')}>
                 <span className={cx('grid size-4 place-items-center rounded-full border', activa ? 'border-lima' : 'border-tenue/60')}>
                   {activa && <span className="size-2 rounded-full bg-lima" />}
@@ -125,7 +125,7 @@ export function Cuestionario() {
 
       {!perfil.consentimientos.DATOS_SALUD.otorgado ? <ConsentimientoRequerido onOtorgado={recargar} /> : (
         <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
-          <div className="sticky top-14 z-10 -mx-4 bg-fondo/90 px-4 py-2 backdrop-blur">
+          <div className="sticky top-14 z-10 -mx-4 bg-fondo px-4 py-2">
             <div className="flex items-center justify-between text-xs text-tenue">
               <span>{completas} de {visibles.length} respondidas</span>
               <span>Declaración jurada</span>
@@ -137,7 +137,7 @@ export function Cuestionario() {
 
           {def.secciones.map((s) => (
             <Tarjeta key={s.id} className="flex flex-col gap-5">
-              <h2 className="text-sm uppercase tracking-wider text-tenue">{s.titulo}</h2>
+              <h2 className="text-sm font-medium text-tenue">{s.titulo}</h2>
               {s.preguntas.filter((p) => visible(p, r)).map((p) => (
                 <fieldset key={p.id} id={`p-${p.id}`} className={cx('flex flex-col gap-2.5 aparecer', p.mostrarSi && 'border-l-2 border-borde pl-4')}>
                   <legend className="font-medium leading-snug mb-2.5">{p.texto}</legend>

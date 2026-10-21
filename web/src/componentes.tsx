@@ -3,9 +3,9 @@ import { ETIQUETA_RESULTADO, TONO_RESULTADO, fecha, fechaLarga, instante } from 
 import { Icono, Insignia, cx } from './ui';
 
 const FONDO: Record<string, string> = {
-  lima: 'border-lima/40 bg-gradient-to-br from-lima/15 to-transparent',
-  ambar: 'border-ambar/40 bg-gradient-to-br from-ambar/15 to-transparent',
-  cielo: 'border-cielo/40 bg-gradient-to-br from-cielo/15 to-transparent',
+  lima: 'border-lima/30 bg-lima-suave',
+  ambar: 'border-ambar/30 bg-ambar-suave',
+  cielo: 'border-cielo/30 bg-cielo-suave',
 };
 const TEXTO: Record<string, string> = { lima: 'text-lima', ambar: 'text-ambar', cielo: 'text-cielo' };
 
@@ -21,20 +21,20 @@ export function ResultadoOrientacion({ o, compacto }: { o: Orientacion; compacto
   const causales = o.motivos.filter((m) => m.tipo !== 'AVISO');
   const avisos = o.motivos.filter((m) => m.tipo === 'AVISO');
   return (
-    <section className={cx('rounded-2xl border p-5', FONDO[tono])} aria-live="polite">
+    <section className={cx('rounded-xl border p-5', FONDO[tono])} aria-live="polite">
       <div className="flex items-start gap-3">
-        <span className={cx('grid size-10 shrink-0 place-items-center rounded-xl bg-fondo/60', TEXTO[tono])}>
+        <span className={cx('grid size-10 shrink-0 place-items-center rounded-lg bg-fondo/60', TEXTO[tono])}>
           <Icono nombre={o.resultado === 'FAVORABLE' ? 'check' : o.resultado === 'REVISION_MEDICA' ? 'estetoscopio' : 'reloj'} />
         </span>
         <div className="min-w-0">
-          <p className={cx('text-xs uppercase tracking-wider', TEXTO[tono])}>Resultado orientativo</p>
+          <p className={cx('text-sm font-medium', TEXTO[tono])}>Resultado orientativo</p>
           <h2 className="text-xl font-semibold tracking-tight">{ETIQUETA_RESULTADO[o.resultado]}</h2>
           <p className="mt-1 text-tenue">{BAJADA[o.resultado]}</p>
         </div>
       </div>
 
       {o.resultado === 'DIFERIMIENTO_TEMPORAL' && (
-        <div className="mt-4 rounded-xl bg-fondo/60 p-3.5">
+        <div className="mt-4 rounded-lg bg-fondo/60 p-3.5">
           {o.fechaHabilitacionEstimada ? (
             <p>Fecha estimada para volver a donar: <strong className="text-ambar">{fechaLarga(o.fechaHabilitacionEstimada)}</strong></p>
           ) : (

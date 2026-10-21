@@ -35,7 +35,7 @@ export function Historial() {
         </Tarjeta>
       </div>
 
-      <h2 className="mt-8 mb-3 text-sm uppercase tracking-wider text-tenue">Donaciones</h2>
+      <h2 className="mt-8 mb-3 text-sm font-medium text-tenue">Donaciones</h2>
       {!h.donaciones.length ? (
         <Vacio icono="gota" titulo="Todavía no registramos donaciones">Cuando dones, el centro la registrará y aparecerá acá.</Vacio>
       ) : (
@@ -57,8 +57,8 @@ export function Historial() {
 
       {!!h.evaluaciones.length && (
         <>
-          <h2 className="mt-8 mb-3 text-sm uppercase tracking-wider text-tenue">Evaluaciones presenciales</h2>
-          <ul className="divide-y divide-borde rounded-2xl border border-borde bg-superficie">
+          <h2 className="mt-8 mb-3 text-sm font-medium text-tenue">Evaluaciones presenciales</h2>
+          <ul className="divide-y divide-borde rounded-xl border border-borde bg-superficie">
             {h.evaluaciones.map((e, i) => (
               <li key={i} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                 <div>

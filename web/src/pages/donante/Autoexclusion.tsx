@@ -42,7 +42,7 @@ export function Autoexclusion() {
       <Encabezado titulo={datos.procedimiento.titulo} bajada={`Procedimiento según la ${datos.procedimiento.norma}.`} />
 
       <Tarjeta className="flex gap-4">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-superficie-2 text-tenue"><Icono nombre="candado" /></span>
+        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-superficie-2 text-tenue"><Icono nombre="candado" /></span>
         <ul className="grid gap-2 text-[15px] text-tenue">
           {datos.procedimiento.pasos.map((p) => <li key={p}>{p}</li>)}
         </ul>
@@ -51,7 +51,7 @@ export function Autoexclusion() {
       {acuse && (
         <Tarjeta className="mt-4 border-lima/40 aparecer" role="status">
           <div className="flex items-start gap-3">
-            <span className="grid size-10 place-items-center rounded-xl bg-lima text-fondo"><Icono nombre="check" /></span>
+            <span className="grid size-10 place-items-center rounded-lg bg-lima text-fondo"><Icono nombre="check" /></span>
             <div>
               <h2 className="text-lg font-semibold">Recibimos tu solicitud</h2>
               <p className="text-tenue">Se registró de forma confidencial el {instante(acuse.confirmadaEn)} y solo la verá el personal autorizado.</p>
@@ -61,7 +61,7 @@ export function Autoexclusion() {
         </Tarjeta>
       )}
 
-      <h2 className="mt-8 mb-3 text-sm uppercase tracking-wider text-tenue">¿Qué donación no debería usarse?</h2>
+      <h2 className="mt-8 mb-3 text-sm font-medium text-tenue">¿Qué donación no debería usarse?</h2>
       {!datos.donaciones.length ? (
         <Vacio icono="gota" titulo="No tenés donaciones registradas">
           La autoexclusión se solicita sobre una donación ya realizada. Cuando dones, vas a poder usar esta opción.
@@ -74,7 +74,7 @@ export function Autoexclusion() {
               return (
                 <button key={d.id} role="radio" aria-checked={activa} disabled={d.autoexclusionSolicitada}
                   onClick={() => { setSeleccion(d.id); setFallo(''); setAcuse(null); }}
-                  className={cx('flex items-center gap-3 rounded-2xl border p-4 text-left transition',
+                  className={cx('flex items-center gap-3 rounded-xl border p-4 text-left transition',
                     d.autoexclusionSolicitada ? 'cursor-not-allowed border-borde opacity-60' : 'cursor-pointer',
                     activa ? 'border-lima/60 bg-lima-suave' : !d.autoexclusionSolicitada && 'border-borde bg-superficie hover:border-tenue/50')}>
                   <span className={cx('grid size-5 place-items-center rounded-full border', activa ? 'border-lima' : 'border-tenue/60')}>

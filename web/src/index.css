@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
-/* Estética minimalista en modo oscuro con acento lima (sección 9.3 del documento). */
+/* Estética minimalista en modo oscuro, grises neutros y un único acento lima (sección 9.3 del documento). */
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --color-fondo: #0a0c0f;
-  --color-superficie: #12161b;
-  --color-superficie-2: #191e25;
-  --color-borde: #262d36;
-  --color-texto: #e8ebf0;
-  --color-tenue: #9aa3af;
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-fondo: #0b0b0c;
+  --color-superficie: #131315;
+  --color-superficie-2: #1b1b1e;
+  --color-borde: #27272a;
+  --color-texto: #f4f4f5;
+  --color-tenue: #a1a1aa;
   --color-lima: #c6f432;
   --color-lima-suave: #c6f4321f;
   --color-sangre: #f0565b;

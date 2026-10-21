@@ -205,7 +205,7 @@ export function Legajo() {
             <h2 className="font-medium">Estudios adjuntos</h2>
             <ul className="mt-3 grid gap-3">
               {l.estudios.map((e) => (
-                <li key={e.id} className="grid gap-2 rounded-xl border border-borde p-3">
+                <li key={e.id} className="grid gap-2 rounded-lg border border-borde p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <a href={`/api/hospital/postulantes/${p.id}/estudios/${e.id}/archivo`} target="_blank" rel="noreferrer" className="font-medium hover:text-lima break-all">{e.nombreArchivo}</a>
                     <Insignia tono={e.estado === 'PROCESADO' ? 'lima' : 'ambar'}>{e.estado === 'PROCESADO' ? 'Interpretado' : 'Requiere revisión'}</Insignia>

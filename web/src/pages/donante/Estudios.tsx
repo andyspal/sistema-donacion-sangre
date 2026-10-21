@@ -65,7 +65,7 @@ export function Estudios() {
       <Tarjeta className="flex flex-col gap-4">
         <label
           onDragOver={(e) => { e.preventDefault(); setArrastrando(true); }} onDragLeave={() => setArrastrando(false)} onDrop={soltar}
-          className={cx('flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center transition',
+          className={cx('flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-8 text-center transition',
             arrastrando ? 'border-lima bg-lima-suave' : 'border-borde hover:border-tenue/60')}>
           <Icono nombre="archivo" className="size-8 text-tenue" />
           {archivo ? (
@@ -105,7 +105,7 @@ export function Estudios() {
         </p>
       </Tarjeta>
 
-      <h2 className="mt-8 mb-3 text-sm uppercase tracking-wider text-tenue">Tus estudios</h2>
+      <h2 className="mt-8 mb-3 text-sm font-medium text-tenue">Tus estudios</h2>
       {cargando && !estudios ? <Cargando /> : !estudios?.length ? (
         <Vacio icono="archivo" titulo="Todavía no adjuntaste estudios">Podés pedir tu orientación igual: la hemoglobina se mide en el centro.</Vacio>
       ) : (

@@ -97,9 +97,9 @@ export function Tablero() {
       </div>
 
       {siguiente && (
-        <Link to={siguiente.a} className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-lima px-5 py-4 text-fondo hover:brightness-110">
+        <Link to={siguiente.a} className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-texto px-5 py-4 text-fondo hover:bg-texto/85">
           <span>
-            <span className="block text-xs font-medium uppercase tracking-wider opacity-70">Siguiente paso</span>
+            <span className="block text-sm font-medium opacity-70">Siguiente paso</span>
             <span className="block text-lg font-semibold">{siguiente.accion}: {siguiente.titulo.toLowerCase()}</span>
           </span>
           <Icono nombre="flecha" className="size-6" />
@@ -110,7 +110,7 @@ export function Tablero() {
         <ol className="divide-y divide-borde">
           {lista.map((p, i) => (
             <li key={p.titulo}>
-              <Link to={p.a} className="flex items-center gap-3.5 px-4 py-3.5 sm:px-5 hover:bg-superficie-2/60 rounded-2xl">
+              <Link to={p.a} className="flex items-center gap-3.5 px-4 py-3.5 sm:px-5 hover:bg-superficie-2/60 rounded-xl">
                 <span className={cx('grid size-7 shrink-0 place-items-center rounded-full text-xs font-semibold', MARCA[p.estado])}>
                   {p.estado === 'hecho' ? <Icono nombre="check" className="size-4" /> : p.estado === 'atencion' ? '!' : i + 1}
                 </span>
@@ -131,7 +131,7 @@ export function Tablero() {
       </Tarjeta>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2 md:hidden">
-        <Link to="/app/autoexclusion" className="flex items-center gap-3 rounded-2xl border border-borde bg-superficie p-4 text-sm">
+        <Link to="/app/autoexclusion" className="flex items-center gap-3 rounded-xl border border-borde bg-superficie p-4 text-sm">
           <Icono nombre="candado" className="text-tenue" /> Autoexclusión confidencial
         </Link>
       </div>

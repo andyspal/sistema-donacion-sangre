@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
+import '@fontsource-variable/inter';
 import './index.css';
 import { Protegida, SesionProvider } from './sesion';
 import { Inicio } from './pages/publico/Inicio';
