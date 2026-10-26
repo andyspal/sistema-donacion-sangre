@@ -12,7 +12,7 @@ interface PerfilDonante {
 function Interruptor({ activo, onChange, etiqueta }: { activo: boolean; onChange: (v: boolean) => void; etiqueta: string }) {
   return (
     <button type="button" role="switch" aria-checked={activo} aria-label={etiqueta} onClick={() => onChange(!activo)}
-      className={cx('relative h-7 w-12 shrink-0 rounded-full transition cursor-pointer', activo ? 'bg-lima' : 'bg-superficie-2 border border-borde')}>
+      className={cx('relative h-7 w-12 shrink-0 rounded-full transition cursor-pointer', activo ? 'bg-primario' : 'bg-superficie-2 border border-borde')}>
       <span className={cx('absolute top-1 size-5 rounded-full transition-all', activo ? 'left-6 bg-fondo' : 'left-1 bg-tenue')} />
     </button>
   );

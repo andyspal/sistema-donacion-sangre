@@ -61,7 +61,7 @@ export function Convocatorias() {
                   </div>
                   <div className="flex gap-4 text-center">
                     <div><p className="text-xl font-semibold tabular-nums">{c.envios.length}</p><p className="text-xs text-tenue">avisos</p></div>
-                    <div><p className="text-xl font-semibold tabular-nums text-lima">{reservas}</p><p className="text-xs text-tenue">turnos</p></div>
+                    <div><p className="text-xl font-semibold tabular-nums text-primario">{reservas}</p><p className="text-xs text-tenue">turnos</p></div>
                   </div>
                 </div>
                 {c.estado === 'SIN_DESTINATARIOS' && (

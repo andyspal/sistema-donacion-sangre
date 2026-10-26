@@ -3,11 +3,11 @@ import { ETIQUETA_RESULTADO, TONO_RESULTADO, fecha, fechaLarga, instante } from 
 import { Icono, Insignia, cx } from './ui';
 
 const FONDO: Record<string, string> = {
-  lima: 'border-lima/30 bg-lima-suave',
+  lima: 'border-verde/30 bg-verde-suave',
   ambar: 'border-ambar/30 bg-ambar-suave',
   cielo: 'border-cielo/30 bg-cielo-suave',
 };
-const TEXTO: Record<string, string> = { lima: 'text-lima', ambar: 'text-ambar', cielo: 'text-cielo' };
+const TEXTO: Record<string, string> = { lima: 'text-verde', ambar: 'text-ambar', cielo: 'text-cielo' };
 
 const BAJADA = {
   FAVORABLE: 'Según lo que declaraste, no encontramos impedimentos para donar.',
@@ -23,7 +23,7 @@ export function ResultadoOrientacion({ o, compacto }: { o: Orientacion; compacto
   return (
     <section className={cx('rounded-xl border p-5', FONDO[tono])} aria-live="polite">
       <div className="flex items-start gap-3">
-        <span className={cx('grid size-10 shrink-0 place-items-center rounded-lg bg-fondo/60', TEXTO[tono])}>
+        <span className={cx('grid size-10 shrink-0 place-items-center rounded-lg bg-superficie/70', TEXTO[tono])}>
           <Icono nombre={o.resultado === 'FAVORABLE' ? 'check' : o.resultado === 'REVISION_MEDICA' ? 'estetoscopio' : 'reloj'} />
         </span>
         <div className="min-w-0">
@@ -34,7 +34,7 @@ export function ResultadoOrientacion({ o, compacto }: { o: Orientacion; compacto
       </div>
 
       {o.resultado === 'DIFERIMIENTO_TEMPORAL' && (
-        <div className="mt-4 rounded-lg bg-fondo/60 p-3.5">
+        <div className="mt-4 rounded-lg bg-superficie/70 p-3.5">
           {o.fechaHabilitacionEstimada ? (
             <p>Fecha estimada para volver a donar: <strong className="text-ambar">{fechaLarga(o.fechaHabilitacionEstimada)}</strong></p>
           ) : (

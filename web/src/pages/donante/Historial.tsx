@@ -29,7 +29,7 @@ export function Historial() {
         </Tarjeta>
         <Tarjeta className="col-span-2 sm:col-span-1">
           <p className="text-sm text-tenue">Próxima donación</p>
-          <p className={`mt-1 text-lg font-semibold ${habilitado ? 'text-lima' : 'text-ambar'}`}>
+          <p className={`mt-1 text-lg font-semibold ${habilitado ? 'text-verde' : 'text-ambar'}`}>
             {habilitado ? 'Desde hoy' : fechaLarga(h.intervalo.fechaHabilitacion)}
           </p>
         </Tarjeta>

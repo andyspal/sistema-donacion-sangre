@@ -23,7 +23,7 @@ export function Marca() {
     <span className="flex items-center gap-2 font-semibold tracking-tight">
       <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
         <path d="M12 2.5c-3.6 5.1-7.2 9.2-7.2 12.8a7.2 7.2 0 0 0 14.4 0c0-3.6-3.6-7.7-7.2-12.8z" fill="var(--color-sangre)" />
-        <path d="M9.2 15.6h5.6M12 12.8v5.6" stroke="var(--color-lima)" strokeWidth="2" strokeLinecap="round" />
+        <path d="M9.2 15.6h5.6M12 12.8v5.6" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
       </svg>
       HemoRed
     </span>
@@ -75,7 +75,7 @@ export function DonanteLayout() {
             <NavLink to="/app/avisos" className={enlace} title="Avisos" aria-label={`Avisos${sinLeer ? ` (${sinLeer} sin leer)` : ''}`}>
               <span className="relative">
                 <Icono nombre="campana" className="size-4" />
-                {sinLeer > 0 && <span className="absolute -right-1 -top-1 size-2 rounded-full bg-lima" />}
+                {sinLeer > 0 && <span className="absolute -right-1 -top-1 size-2 rounded-full bg-primario" />}
               </span>
               <span className={visible}>Avisos{sinLeer > 0 && ` (${sinLeer})`}</span>
             </NavLink>
@@ -98,7 +98,7 @@ export function DonanteLayout() {
               className="relative grid size-10 place-items-center rounded-lg text-tenue hover:text-texto hover:bg-superficie-2">
               <Icono nombre="campana" />
               {sinLeer > 0 && (
-                <span className="absolute right-1.5 top-1.5 grid min-w-4 h-4 place-items-center rounded-full bg-lima px-1 text-[10px] font-bold text-fondo">{sinLeer}</span>
+                <span className="absolute right-1.5 top-1.5 grid min-w-4 h-4 place-items-center rounded-full bg-primario px-1 text-[10px] font-bold text-fondo">{sinLeer}</span>
               )}
             </NavLink>
             <button onClick={cerrar} className="grid size-10 place-items-center rounded-lg text-tenue hover:text-texto hover:bg-superficie-2 cursor-pointer" aria-label="Cerrar sesión" title="Cerrar sesión">
@@ -118,7 +118,7 @@ export function DonanteLayout() {
         <div className="mx-auto grid max-w-md grid-cols-5">
           {NAV.map((n) => (
             <NavLink key={n.a} to={n.a} end={n.fin}
-              className={({ isActive }) => cx('flex flex-col items-center gap-1 py-2.5 text-[11px] transition', isActive ? 'text-lima' : 'text-tenue')}>
+              className={({ isActive }) => cx('flex flex-col items-center gap-1 py-2.5 text-[11px] transition', isActive ? 'text-primario' : 'text-tenue')}>
               <Icono nombre={n.icono} className="size-5" />{n.texto}
             </NavLink>
           ))}

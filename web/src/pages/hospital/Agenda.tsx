@@ -37,7 +37,7 @@ function GenerarAgenda({ onCreada }: { onCreada: () => void }) {
           const activo = f.diasSemana.includes(i);
           return (
             <button key={d} type="button" aria-pressed={activo} onClick={() => setF({ ...f, diasSemana: activo ? f.diasSemana.filter((x) => x !== i) : [...f.diasSemana, i] })}
-              className={cx('rounded-lg border px-3 py-1.5 text-sm cursor-pointer', activo ? 'border-lima bg-lima-suave text-lima' : 'border-borde text-tenue')}>{d}</button>
+              className={cx('rounded-lg border px-3 py-1.5 text-sm cursor-pointer', activo ? 'border-primario bg-primario-suave text-primario' : 'border-borde text-tenue')}>{d}</button>
           );
         })}
       </div>

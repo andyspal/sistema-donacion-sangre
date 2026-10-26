@@ -48,8 +48,8 @@ export function Icono({ nombre, className = '' }: { nombre: keyof typeof RUTAS |
 
 type Variante = 'primario' | 'secundario' | 'fantasma' | 'peligro';
 const VARIANTES: Record<Variante, string> = {
-  primario: 'bg-texto text-fondo hover:bg-texto/85 font-medium',
-  secundario: 'bg-superficie-2 text-texto border border-borde hover:border-tenue/60',
+  primario: 'bg-primario text-white hover:bg-primario-hover font-medium',
+  secundario: 'bg-superficie-2 text-texto border border-control hover:border-tenue',
   fantasma: 'text-tenue hover:text-texto hover:bg-superficie-2',
   peligro: 'bg-sangre-suave text-sangre border border-sangre/40 hover:bg-sangre/25',
 };
@@ -95,7 +95,7 @@ export function Encabezado({ titulo, bajada, acciones, volver }: { titulo: strin
 
 type Tono = 'lima' | 'ambar' | 'cielo' | 'sangre' | 'neutro';
 const TONOS: Record<Tono, string> = {
-  lima: 'bg-lima-suave text-lima border-lima/30',
+  lima: 'bg-verde-suave text-verde border-verde/30',
   ambar: 'bg-ambar-suave text-ambar border-ambar/30',
   cielo: 'bg-cielo-suave text-cielo border-cielo/30',
   sangre: 'bg-sangre-suave text-sangre border-sangre/30',
@@ -126,7 +126,7 @@ export function Alerta({ tono = 'cielo', titulo, children, icono, className }: {
 export function Cargando({ pantalla, texto = 'Cargando…' }: { pantalla?: boolean; texto?: string }) {
   return (
     <div className={cx('flex items-center justify-center gap-3 text-tenue', pantalla ? 'min-h-dvh' : 'py-12')} role="status">
-      <span className="size-5 rounded-full border-2 border-lima border-t-transparent animate-spin" aria-hidden="true" />
+      <span className="size-5 rounded-full border-2 border-primario border-t-transparent animate-spin" aria-hidden="true" />
       {texto}
     </div>
   );
@@ -156,16 +156,16 @@ export function Campo({ etiqueta, error, ayuda, children, id }: { etiqueta: Reac
   );
 }
 
-const ESTILO_ENTRADA = 'w-full rounded-lg border bg-fondo px-3.5 py-2.5 text-[15px] text-texto placeholder:text-tenue/60 transition focus:outline-none focus:border-lima';
+const ESTILO_ENTRADA = 'w-full rounded-lg border bg-superficie px-3.5 py-2.5 text-[15px] text-texto placeholder:text-tenue/60 transition focus:outline-none focus:border-primario';
 
 export function Entrada({ invalida, className, ...props }: InputHTMLAttributes<HTMLInputElement> & { invalida?: boolean }) {
-  return <input {...props} aria-invalid={invalida || undefined} className={cx(ESTILO_ENTRADA, invalida ? 'border-sangre' : 'border-borde', className)} />;
+  return <input {...props} aria-invalid={invalida || undefined} className={cx(ESTILO_ENTRADA, invalida ? 'border-sangre' : 'border-control', className)} />;
 }
 
 export function Selector({ invalida, className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement> & { invalida?: boolean }) {
   return (
-    <select {...props} aria-invalid={invalida || undefined} className={cx(ESTILO_ENTRADA, 'appearance-none bg-[length:16px] bg-[right_12px_center] bg-no-repeat pr-9', invalida ? 'border-sangre' : 'border-borde', className)}
-      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa3af' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")" }}>
+    <select {...props} aria-invalid={invalida || undefined} className={cx(ESTILO_ENTRADA, 'appearance-none bg-[length:16px] bg-[right_12px_center] bg-no-repeat pr-9', invalida ? 'border-sangre' : 'border-control', className)}
+      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b6068' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")" }}>
       {children}
     </select>
   );
@@ -182,7 +182,7 @@ export function Segmentado<T extends string | boolean>({ opciones, valor, onChan
         return (
           <button key={String(o.valor)} type="button" role="radio" aria-checked={activo} onClick={() => onChange(o.valor)}
             className={cx('min-w-16 rounded-md px-4 py-1.5 text-sm font-medium transition cursor-pointer',
-              activo ? 'bg-lima text-fondo' : 'text-tenue hover:text-texto hover:bg-superficie-2')}>
+              activo ? 'bg-primario text-fondo' : 'text-tenue hover:text-texto hover:bg-superficie-2')}>
             {o.texto}
           </button>
         );
@@ -196,10 +196,10 @@ export function Casilla({ marcada, onChange, children, deshabilitada }: { marcad
   return (
     <label className={cx('flex items-start gap-3 rounded-lg border px-3.5 py-3 transition',
       deshabilitada ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-      marcada ? 'border-lima/60 bg-lima-suave' : 'border-borde hover:border-tenue/50')}>
+      marcada ? 'border-primario/60 bg-primario-suave' : 'border-borde hover:border-tenue/50')}>
       <input type="checkbox" className="peer sr-only" aria-labelledby={id} checked={marcada} disabled={deshabilitada} onChange={(e) => onChange(e.target.checked)} />
-      <span className={cx('mt-0.5 grid size-5 place-items-center rounded-md border transition peer-focus-visible:outline-2 peer-focus-visible:outline-lima',
-        marcada ? 'bg-lima border-lima text-fondo' : 'border-tenue/60')}>
+      <span className={cx('mt-0.5 grid size-5 place-items-center rounded-md border transition peer-focus-visible:outline-2 peer-focus-visible:outline-primario',
+        marcada ? 'bg-primario border-primario text-fondo' : 'border-tenue/60')}>
         {marcada && <Icono nombre="check" className="size-3.5" />}
       </span>
       <span id={id} className="text-sm leading-relaxed">{children}</span>
@@ -223,7 +223,7 @@ export function Dialogo({ abierto, onCerrar, titulo, children, acciones }: {
   }, [abierto]);
   return (
     <dialog ref={ref} onClose={onCerrar} onCancel={onCerrar}
-      className="m-auto w-[min(92vw,30rem)] rounded-xl border border-borde bg-superficie p-0 text-texto backdrop:bg-black/70">
+      className="m-auto w-[min(92vw,30rem)] rounded-xl border border-borde bg-superficie p-0 text-texto backdrop:bg-black/40">
       <div className="p-5">
         <h2 className="text-lg font-semibold">{titulo}</h2>
         <div className="mt-2 text-tenue text-[15px] leading-relaxed">{children}</div>

@@ -53,7 +53,7 @@ export function Orientacion() {
           {error.detalle?.camposFaltantes?.length ? (
             <ul className="mt-1 grid gap-1">
               {error.detalle.camposFaltantes.map((c) => FALTANTE[c] && (
-                <li key={c}><Link to={FALTANTE[c].a} className="text-lima hover:underline">{FALTANTE[c].texto} →</Link></li>
+                <li key={c}><Link to={FALTANTE[c].a} className="text-primario hover:underline">{FALTANTE[c].texto} →</Link></li>
               ))}
             </ul>
           ) : null}
@@ -79,17 +79,17 @@ export function Orientacion() {
 
           <div className="flex flex-wrap gap-3">
             {actual.resultado === 'FAVORABLE' && (
-              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg bg-texto px-5 py-3 font-medium text-fondo hover:bg-texto/85">
+              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg bg-primario px-5 py-3 font-medium text-white hover:bg-primario-hover">
                 <Icono nombre="calendario" className="size-5" /> Reservar mi turno
               </Link>
             )}
             {actual.resultado === 'DIFERIMIENTO_TEMPORAL' && actual.fechaHabilitacionEstimada && (
-              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg border border-borde px-5 py-3 hover:border-tenue/60">
+              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg border border-control px-5 py-3 hover:border-tenue/60">
                 <Icono nombre="calendario" className="size-5" /> Reservar desde el {fecha(actual.fechaHabilitacionEstimada)}
               </Link>
             )}
             {actual.resultado === 'REVISION_MEDICA' && (
-              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg border border-borde px-5 py-3 hover:border-tenue/60">
+              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg border border-control px-5 py-3 hover:border-tenue/60">
                 <Icono nombre="calendario" className="size-5" /> Reservar turno para la evaluación
               </Link>
             )}
@@ -119,7 +119,7 @@ export function Orientacion() {
                   ))}
                 </ul>
               ) : (
-                <p className="mt-1 text-sm">Sin estudios. <Link to="/app/estudios" className="text-lima hover:underline">Adjuntar uno</Link></p>
+                <p className="mt-1 text-sm">Sin estudios. <Link to="/app/estudios" className="text-primario hover:underline">Adjuntar uno</Link></p>
               )}
             </Tarjeta>
           </div>

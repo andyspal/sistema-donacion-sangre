@@ -128,7 +128,7 @@ export function Registro() {
           </Tarjeta>
 
           <Boton type="submit" cargando={enviando} className="self-stretch sm:self-end">Crear mi cuenta</Boton>
-          <p className="text-sm text-tenue">¿Ya tenés cuenta? <Link to="/ingresar" className="text-lima hover:underline">Ingresá</Link></p>
+          <p className="text-sm text-tenue">¿Ya tenés cuenta? <Link to="/ingresar" className="text-primario hover:underline">Ingresá</Link></p>
         </form>
       </div>
     </div>

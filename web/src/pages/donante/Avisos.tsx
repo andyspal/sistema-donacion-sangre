@@ -27,8 +27,8 @@ export function Avisos() {
         <ul className="grid gap-3">
           {datos.map((a) => (
             <li key={a.id}>
-              <Tarjeta className={cx('flex gap-3', !a.leida && 'border-lima/40')}>
-                <span className={cx('grid size-10 shrink-0 place-items-center rounded-lg', a.tipo === 'CONVOCATORIA' ? 'bg-lima-suave text-lima' : 'bg-superficie-2 text-tenue')}>
+              <Tarjeta className={cx('flex gap-3', !a.leida && 'border-primario/40')}>
+                <span className={cx('grid size-10 shrink-0 place-items-center rounded-lg', a.tipo === 'CONVOCATORIA' ? 'bg-primario-suave text-primario' : 'bg-superficie-2 text-tenue')}>
                   <Icono nombre={ICONO[a.tipo]} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -40,7 +40,7 @@ export function Avisos() {
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-tenue">
                     <span>{instante(a.creadaEn)} · {a.canal.toLowerCase()}</span>
                     {a.tipo === 'CONVOCATORIA' && a.enlace && (
-                      <Link to={a.enlace} className="inline-flex items-center gap-1 rounded-lg bg-texto px-3 py-1.5 text-sm font-medium text-fondo hover:bg-texto/85">
+                      <Link to={a.enlace} className="inline-flex items-center gap-1 rounded-lg bg-primario px-3 py-1.5 text-sm font-medium text-white hover:bg-primario-hover">
                         Reservar turno <Icono nombre="flecha" className="size-3.5" />
                       </Link>
                     )}

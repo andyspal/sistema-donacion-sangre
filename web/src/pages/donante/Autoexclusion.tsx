@@ -49,13 +49,13 @@ export function Autoexclusion() {
       </Tarjeta>
 
       {acuse && (
-        <Tarjeta className="mt-4 border-lima/40 aparecer" role="status">
+        <Tarjeta className="mt-4 border-verde/40 aparecer" role="status">
           <div className="flex items-start gap-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-lima text-fondo"><Icono nombre="check" /></span>
+            <span className="grid size-10 place-items-center rounded-lg bg-verde text-white"><Icono nombre="check" /></span>
             <div>
               <h2 className="text-lg font-semibold">Recibimos tu solicitud</h2>
               <p className="text-tenue">Se registró de forma confidencial el {instante(acuse.confirmadaEn)} y solo la verá el personal autorizado.</p>
-              <p className="mt-2 text-sm">Código de acuse: <span className="font-mono text-lima">{acuse.codigoAcuse}</span></p>
+              <p className="mt-2 text-sm">Código de acuse: <span className="font-mono text-primario">{acuse.codigoAcuse}</span></p>
             </div>
           </div>
         </Tarjeta>
@@ -76,9 +76,9 @@ export function Autoexclusion() {
                   onClick={() => { setSeleccion(d.id); setFallo(''); setAcuse(null); }}
                   className={cx('flex items-center gap-3 rounded-xl border p-4 text-left transition',
                     d.autoexclusionSolicitada ? 'cursor-not-allowed border-borde opacity-60' : 'cursor-pointer',
-                    activa ? 'border-lima/60 bg-lima-suave' : !d.autoexclusionSolicitada && 'border-borde bg-superficie hover:border-tenue/50')}>
-                  <span className={cx('grid size-5 place-items-center rounded-full border', activa ? 'border-lima' : 'border-tenue/60')}>
-                    {activa && <span className="size-2.5 rounded-full bg-lima" />}
+                    activa ? 'border-primario/60 bg-primario-suave' : !d.autoexclusionSolicitada && 'border-borde bg-superficie hover:border-tenue/50')}>
+                  <span className={cx('grid size-5 place-items-center rounded-full border', activa ? 'border-primario' : 'border-tenue/60')}>
+                    {activa && <span className="size-2.5 rounded-full bg-primario" />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-medium">{fechaHora(d.fechaHora)}</span>

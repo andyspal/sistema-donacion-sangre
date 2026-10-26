@@ -45,7 +45,7 @@ function pasos(r: Resumen): Paso[] {
 }
 
 const MARCA: Record<Estado, string> = {
-  hecho: 'bg-lima text-fondo',
+  hecho: 'bg-verde text-white',
   pendiente: 'border border-tenue/50 text-tenue',
   atencion: 'bg-ambar text-fondo',
   opcional: 'border border-dashed border-tenue/50 text-tenue',
@@ -65,12 +65,12 @@ export function Tablero() {
       <Encabezado titulo={`Hola, ${r.nombre}`} bajada="Este es tu camino para donar sangre." />
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Tarjeta className={cx(habilitado ? 'border-lima/30' : 'border-ambar/30')}>
+        <Tarjeta className={cx(habilitado ? 'border-verde/30' : 'border-ambar/30')}>
           <div className="flex items-center justify-between">
             <p className="text-sm text-tenue">Intervalo entre donaciones</p>
             {r.grupo && <Insignia tono="sangre"><Icono nombre="gota" className="size-3" />{r.grupo}</Insignia>}
           </div>
-          <p className={cx('mt-2 text-lg font-semibold', habilitado ? 'text-lima' : 'text-ambar')}>
+          <p className={cx('mt-2 text-lg font-semibold', habilitado ? 'text-verde' : 'text-ambar')}>
             {habilitado ? 'Podés donar desde hoy' : `Podrás donar desde el ${fechaLarga(r.intervalo.fechaHabilitacion)}`}
           </p>
           <p className="mt-1 text-sm text-tenue">
@@ -88,7 +88,7 @@ export function Tablero() {
           ) : (
             <>
               <p className="mt-2 text-lg font-semibold">Sin turno reservado</p>
-              <Link to="/app/turnos" className="mt-1 inline-flex items-center gap-1 text-sm text-lima hover:underline">
+              <Link to="/app/turnos" className="mt-1 inline-flex items-center gap-1 text-sm text-primario hover:underline">
                 Reservar un turno <Icono nombre="flecha" className="size-3.5" />
               </Link>
             </>
@@ -97,9 +97,9 @@ export function Tablero() {
       </div>
 
       {siguiente && (
-        <Link to={siguiente.a} className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-texto px-5 py-4 text-fondo hover:bg-texto/85">
+        <Link to={siguiente.a} className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-primario px-5 py-4 text-white hover:bg-primario-hover">
           <span>
-            <span className="block text-sm font-medium opacity-70">Siguiente paso</span>
+            <span className="block text-sm font-medium opacity-90">Siguiente paso</span>
             <span className="block text-lg font-semibold">{siguiente.accion}: {siguiente.titulo.toLowerCase()}</span>
           </span>
           <Icono nombre="flecha" className="size-6" />

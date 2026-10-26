@@ -63,7 +63,7 @@ export function Ingresar() {
         </form>
 
         <p className="mt-6 text-sm text-tenue">
-          ¿Todavía no tenés cuenta? <Link to="/registro" className="text-lima hover:underline">Registrate como donante</Link>
+          ¿Todavía no tenés cuenta? <Link to="/registro" className="text-primario hover:underline">Registrate como donante</Link>
         </p>
 
         <details className="mt-8 rounded-lg border border-dashed border-borde p-3 text-sm">

@@ -156,7 +156,7 @@ export function Legajo() {
       <div className="grid gap-3 md:grid-cols-3">
         <Tarjeta>
           <p className="text-sm text-tenue">Intervalo entre donaciones</p>
-          <p className={`mt-1 font-semibold ${l.intervalo.cumplido ? 'text-lima' : 'text-ambar'}`}>
+          <p className={`mt-1 font-semibold ${l.intervalo.cumplido ? 'text-verde' : 'text-ambar'}`}>
             {l.intervalo.cumplido ? 'Cumplido' : `Habilitado desde el ${fecha(l.intervalo.fechaHabilitacion)}`}
           </p>
           <p className="mt-1 text-sm text-tenue">{l.intervalo.donacionesUltimoAnio}/{l.intervalo.maximoAnual} en 12 meses · última {fecha(l.intervalo.ultimaDonacion)}</p>
@@ -207,7 +207,7 @@ export function Legajo() {
               {l.estudios.map((e) => (
                 <li key={e.id} className="grid gap-2 rounded-lg border border-borde p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <a href={`/api/hospital/postulantes/${p.id}/estudios/${e.id}/archivo`} target="_blank" rel="noreferrer" className="font-medium hover:text-lima break-all">{e.nombreArchivo}</a>
+                    <a href={`/api/hospital/postulantes/${p.id}/estudios/${e.id}/archivo`} target="_blank" rel="noreferrer" className="font-medium hover:text-primario break-all">{e.nombreArchivo}</a>
                     <Insignia tono={e.estado === 'PROCESADO' ? 'lima' : 'ambar'}>{e.estado === 'PROCESADO' ? 'Interpretado' : 'Requiere revisión'}</Insignia>
                   </div>
                   <p className="text-xs text-tenue">Fecha del estudio: {fecha(e.fechaEstudio)}</p>

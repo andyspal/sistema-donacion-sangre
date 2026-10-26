@@ -81,9 +81,9 @@ export function Turnos() {
       )}
 
       {confirmado && (
-        <Tarjeta className="mb-4 border-lima/40 aparecer">
+        <Tarjeta className="mb-4 border-verde/40 aparecer">
           <div className="flex items-start gap-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-lima text-fondo"><Icono nombre="check" /></span>
+            <span className="grid size-10 place-items-center rounded-lg bg-verde text-white"><Icono nombre="check" /></span>
             <div>
               <h2 className="text-lg font-semibold">¡Turno confirmado!</h2>
               <p className="text-tenue">{fechaLarga(confirmado.inicio)} a las {confirmado.inicio.slice(11, 16)} h · {confirmado.centro.nombre}</p>
@@ -100,8 +100,8 @@ export function Turnos() {
             <p className="mt-1 text-lg font-semibold">{fechaHora(activo.inicio)}</p>
             <p className="text-sm text-tenue">{activo.centro.nombre} · {activo.centro.domicilio}</p>
             <ul className="mt-3 grid gap-1 text-sm text-tenue">
-              <li className="flex gap-2"><Icono nombre="check" className="size-4 text-lima" />Llevá tu DNI.</li>
-              <li className="flex gap-2"><Icono nombre="check" className="size-4 text-lima" />Desayuná liviano (sin lácteos ni grasas) e hidratate.</li>
+              <li className="flex gap-2"><Icono nombre="check" className="size-4 text-verde" />Llevá tu DNI.</li>
+              <li className="flex gap-2"><Icono nombre="check" className="size-4 text-verde" />Desayuná liviano (sin lácteos ni grasas) e hidratate.</li>
             </ul>
           </div>
           <Boton variante="peligro" onClick={() => setACancelar(activo)}>Cancelar turno</Boton>
@@ -115,12 +115,12 @@ export function Turnos() {
                 : orientacion.fechaHabilitacionEstimada
                   ? `Te recomendamos elegir un día a partir del ${fecha(orientacion.fechaHabilitacionEstimada)} para evitar un diferimiento en el centro.`
                   : 'Te recomendamos esperar a resolver lo indicado antes de reservar.'}{' '}
-              <Link to="/app/orientacion" className="text-lima hover:underline">Ver detalle</Link>
+              <Link to="/app/orientacion" className="text-primario hover:underline">Ver detalle</Link>
             </Alerta>
           )}
           {!orientacion && (
             <Alerta tono="cielo" titulo="¿Ya pediste tu orientación previa?">
-              Te ayuda a evitar viajes en vano. <Link to="/app/orientacion" className="text-lima hover:underline">Pedirla ahora</Link>
+              Te ayuda a evitar viajes en vano. <Link to="/app/orientacion" className="text-primario hover:underline">Pedirla ahora</Link>
             </Alerta>
           )}
 
@@ -131,7 +131,7 @@ export function Turnos() {
                 {centros.map((c) => (
                   <button key={c.id} role="radio" aria-checked={idCentro === c.id} onClick={() => { setIdCentro(c.id); setError(''); }}
                     className={cx('rounded-xl border p-4 text-left transition cursor-pointer',
-                      idCentro === c.id ? 'border-lima/60 bg-lima-suave' : 'border-borde bg-superficie hover:border-tenue/50')}>
+                      idCentro === c.id ? 'border-primario/60 bg-primario-suave' : 'border-borde bg-superficie hover:border-tenue/50')}>
                     <span className="block font-medium leading-snug">{c.nombre}</span>
                     <span className="mt-1 block text-sm text-tenue">{c.domicilio} · {c.localidad}</span>
                   </button>
@@ -159,7 +159,7 @@ export function Turnos() {
                           aria-pressed={dia === d.fecha}
                           className={cx('flex w-[4.25rem] shrink-0 flex-col items-center rounded-lg border py-2.5 transition',
                             bloqueado ? 'cursor-not-allowed border-borde/50 opacity-35' : 'cursor-pointer',
-                            dia === d.fecha ? 'border-lima bg-lima text-fondo' : !bloqueado && 'border-borde bg-superficie hover:border-tenue/50')}>
+                            dia === d.fecha ? 'border-primario bg-primario text-fondo' : !bloqueado && 'border-borde bg-superficie hover:border-tenue/50')}>
                           <span className="text-xs capitalize opacity-80">{nombre}</span>
                           <span className="text-xl font-semibold tabular-nums">{num}</span>
                           <span className="text-xs opacity-80">{d.libres === 0 ? 'lleno' : mes}</span>
@@ -180,7 +180,7 @@ export function Turnos() {
                   <button key={h.id} disabled={h.libres === 0} onClick={() => { setHorario(h); setError(''); }} aria-pressed={horario?.id === h.id}
                     className={cx('rounded-lg border py-2.5 text-center transition',
                       h.libres === 0 ? 'cursor-not-allowed border-borde/50 opacity-35' : 'cursor-pointer',
-                      horario?.id === h.id ? 'border-lima bg-lima text-fondo' : h.libres > 0 && 'border-borde bg-superficie hover:border-tenue/50')}>
+                      horario?.id === h.id ? 'border-primario bg-primario text-fondo' : h.libres > 0 && 'border-borde bg-superficie hover:border-tenue/50')}>
                     <span className="block font-semibold tabular-nums">{h.hora}</span>
                     <span className="block text-xs opacity-75">{h.libres === 0 ? 'Completo' : `${h.libres} ${h.libres === 1 ? 'lugar' : 'lugares'}`}</span>
                   </button>
@@ -193,7 +193,7 @@ export function Turnos() {
 
           {horario && centro && diaSel && (
             <div className="sticky bottom-20 md:bottom-4 z-10 aparecer">
-              <div className="flex flex-col gap-3 rounded-xl border border-lima/40 bg-superficie/95 p-4 shadow-2xl sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 rounded-xl border border-primario/40 bg-superficie/95 p-4 shadow-2xl sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-medium">{fechaCorta(diaSel.fecha)} · {horario.hora} h</p>
                   <p className="text-sm text-tenue">{centro.nombre}</p>

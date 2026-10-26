@@ -53,9 +53,9 @@ function CampoPregunta({ p, valor, onChange, error }: { p: Pregunta; valor: unkn
             return (
               <button key={o.valor} type="button" role="radio" aria-checked={activa} onClick={() => onChange(o.valor)}
                 className={cx('flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-left text-sm transition cursor-pointer',
-                  activa ? 'border-lima/60 bg-lima-suave' : error ? 'border-sangre' : 'border-borde hover:border-tenue/50')}>
-                <span className={cx('grid size-4 place-items-center rounded-full border', activa ? 'border-lima' : 'border-tenue/60')}>
-                  {activa && <span className="size-2 rounded-full bg-lima" />}
+                  activa ? 'border-primario/60 bg-primario-suave' : error ? 'border-sangre' : 'border-borde hover:border-tenue/50')}>
+                <span className={cx('grid size-4 place-items-center rounded-full border', activa ? 'border-primario' : 'border-tenue/60')}>
+                  {activa && <span className="size-2 rounded-full bg-primario" />}
                 </span>
                 {o.texto}
               </button>
@@ -131,7 +131,7 @@ export function Cuestionario() {
               <span>Declaración jurada</span>
             </div>
             <div className="mt-1.5 h-1.5 rounded-full bg-superficie-2" role="progressbar" aria-valuemin={0} aria-valuemax={visibles.length} aria-valuenow={completas}>
-              <div className="h-full rounded-full bg-lima transition-all" style={{ width: `${(completas / Math.max(visibles.length, 1)) * 100}%` }} />
+              <div className="h-full rounded-full bg-primario transition-all" style={{ width: `${(completas / Math.max(visibles.length, 1)) * 100}%` }} />
             </div>
           </div>
 

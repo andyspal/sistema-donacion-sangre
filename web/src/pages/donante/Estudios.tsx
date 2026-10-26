@@ -66,7 +66,7 @@ export function Estudios() {
         <label
           onDragOver={(e) => { e.preventDefault(); setArrastrando(true); }} onDragLeave={() => setArrastrando(false)} onDrop={soltar}
           className={cx('flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-8 text-center transition',
-            arrastrando ? 'border-lima bg-lima-suave' : 'border-borde hover:border-tenue/60')}>
+            arrastrando ? 'border-primario bg-primario-suave' : 'border-control hover:border-tenue')}>
           <Icono nombre="archivo" className="size-8 text-tenue" />
           {archivo ? (
             <span><strong>{archivo.name}</strong> <span className="text-tenue">· {(archivo.size / 1024).toFixed(0)} KB</span></span>
@@ -115,7 +115,7 @@ export function Estudios() {
               <Tarjeta className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <a href={`/api/donante/estudios/${e.id}/archivo`} target="_blank" rel="noreferrer" className="font-medium hover:text-lima break-all">
+                    <a href={`/api/donante/estudios/${e.id}/archivo`} target="_blank" rel="noreferrer" className="font-medium hover:text-primario break-all">
                       {e.nombreArchivo}
                     </a>
                     <p className="text-sm text-tenue">Estudio del {fecha(e.fechaEstudio)} · cargado el {instante(e.cargadoEn)}</p>
@@ -140,7 +140,7 @@ export function Estudios() {
       )}
 
       {!!estudios?.length && (
-        <Link to="/app/orientacion" state={{ solicitar: true }} className="mt-5 inline-flex items-center gap-2 text-lima hover:underline">
+        <Link to="/app/orientacion" state={{ solicitar: true }} className="mt-5 inline-flex items-center gap-2 text-primario hover:underline">
           Actualizar mi orientación con estos estudios <Icono nombre="flecha" className="size-4" />
         </Link>
       )}

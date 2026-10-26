@@ -31,10 +31,10 @@ export function Inicio() {
             más cercano. Sin viajes en vano.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/registro" className="inline-flex items-center gap-2 rounded-lg bg-texto px-5 py-3 font-medium text-fondo hover:bg-texto/85">
+            <Link to="/registro" className="inline-flex items-center gap-2 rounded-lg bg-primario px-5 py-3 font-medium text-white hover:bg-primario-hover">
               Quiero donar <Icono nombre="flecha" className="size-4" />
             </Link>
-            <Link to="/ingresar" className="inline-flex items-center rounded-lg border border-borde px-5 py-3 hover:border-tenue/60">
+            <Link to="/ingresar" className="inline-flex items-center rounded-lg border border-control px-5 py-3 hover:border-tenue/60">
               Ya tengo cuenta
             </Link>
           </div>
@@ -58,7 +58,7 @@ export function Inicio() {
             <ul className="mt-3 grid gap-2 text-sm text-tenue">
               {['Tener entre 16 y 65 años (menores de 18, con autorización).', 'Pesar 50 kg o más.', 'Sentirte bien de salud el día de la donación.',
                 'Llevar tu DNI y haber desayunado liviano.'].map((r) => (
-                <li key={r} className="flex gap-2"><Icono nombre="check" className="size-4 mt-0.5 text-lima" />{r}</li>
+                <li key={r} className="flex gap-2"><Icono nombre="check" className="size-4 mt-0.5 text-verde" />{r}</li>
               ))}
             </ul>
           </div>
