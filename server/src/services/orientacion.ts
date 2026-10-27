@@ -63,7 +63,12 @@ export async function generarOrientacion(idDonante: number): Promise<Orientacion
     const vigente = !!e.fechaEstudio && e.fechaEstudio >= limiteVigencia;
     const considerado = e.estado === 'PROCESADO' && vigente;
     estudios.push({ id: e.id, nombreArchivo: e.nombreArchivo, estado: e.estado, considerado });
-    if (e.estado === 'REQUIERE_REVISION') {
+    if (e.estado === 'DETENIDO') {
+      motivos.push({ regla: 'ESTUDIO_DETENIDO', tipo: 'AVISO',
+        mensaje: e.motivoDetencion === 'VENCIDO'
+          ? `El estudio «${e.nombreArchivo}» tiene más de ${config.parametros.vigencia_estudios_meses} meses: no se analizó ni se tuvo en cuenta.`
+          : `El estudio «${e.nombreArchivo}» no se analizó: ${e.observacion ?? 'no pasó los controles previos.'}` });
+    } else if (e.estado === 'REQUIERE_REVISION') {
       motivos.push({ regla: 'ESTUDIO_REQUIERE_REVISION', tipo: 'AVISO',
         mensaje: `El estudio «${e.nombreArchivo}» no pudo interpretarse o validarse: lo revisará el personal del centro.` });
     } else if (e.estado === 'PROCESADO' && !vigente) {

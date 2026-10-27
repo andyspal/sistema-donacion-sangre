@@ -8,10 +8,12 @@ import { consentimientos, obtenerDonante, perfilPublico, registrarConsentimiento
 import { definicionCuestionario } from '../services/configuracion.ts';
 import { guardarCuestionario, ultimoCuestionario, validarRespuestas } from '../services/cuestionario.ts';
 import {
-  TIPOS_PERMITIDOS, eliminarArchivoEstudio, guardarEstudio, leerArchivoEstudio, listarEstudios, obtenerFilaEstudio, procesarEstudio,
+  TIPOS_PERMITIDOS, eliminarArchivoEstudio, guardarEstudio, leerArchivoEstudio, listarEstudios, obtenerFilaEstudio,
+  procesarEstudio,
 } from '../services/procesadorEstudios.ts';
 import { generarOrientacion, listarOrientaciones, ultimaOrientacion } from '../services/orientacion.ts';
 import { verificarIntervalosDonante } from '../services/intervalos.ts';
+import { habilitacionParaTurnos } from '../services/habilitacion.ts';
 import { cancelarTurno, consultarDisponibilidad, listarCentros, misTurnos, reservarTurno, turnoActivo } from '../services/turnos.ts';
 import { PROCEDIMIENTO, donacionesDelDonante, registrarAutoexclusion } from '../services/autoexclusion.ts';
 
@@ -53,7 +55,8 @@ rutasDonante.put('/donante/perfil', (req, res) => {
 
 rutasDonante.put('/donante/consentimientos', (req, res) => {
   const actuales = consentimientos(idDonante(req));
-  for (const [clave, tipo] of [['datosSalud', 'DATOS_SALUD'], ['convocatorias', 'CONVOCATORIAS']] as [string, TipoConsentimiento][]) {
+  const claves = [['datosSalud', 'DATOS_SALUD'], ['convocatorias', 'CONVOCATORIAS']] as [string, TipoConsentimiento][];
+  for (const [clave, tipo] of claves) {
     const valor = req.body?.[clave];
     if (typeof valor === 'boolean' && valor !== actuales[tipo].otorgado) {
       const id = registrarConsentimiento(idDonante(req), tipo, valor);
@@ -61,6 +64,19 @@ rutasDonante.put('/donante/consentimientos', (req, res) => {
     }
   }
   res.json(consentimientos(idDonante(req)));
+});
+
+/** Preferencias de avisos de turnos por correo (confirmación/cancelación y recordatorio). */
+rutasDonante.put('/donante/preferencias', (req, res) => {
+  const correoTurnos = req.body?.correoTurnos;
+  const recordatorioHoras = req.body?.recordatorioHoras;
+  if (typeof correoTurnos !== 'boolean' || ![0, 24, 48].includes(recordatorioHoras)) {
+    throw new ErrorHttp(422, 'VALIDACION', 'Preferencias inválidas.');
+  }
+  ejecutar('UPDATE donante SET correo_turnos = ?, recordatorio_horas = ? WHERE id_donante = ?',
+    [correoTurnos ? 1 : 0, recordatorioHoras, idDonante(req)]);
+  auditar(req.usuario!.idUsuario, 'ACTUALIZAR_PREFERENCIAS', 'donante', idDonante(req), { correoTurnos, recordatorioHoras });
+  res.json(perfilPublico(donante(req), req.usuario!.email).preferencias);
 });
 
 /** Tablero del donante: estado de cada paso del camino. */
@@ -76,9 +92,15 @@ rutasDonante.get('/donante/resumen', (req, res) => {
     cuestionario: cuestionario
       ? { declaradoEn: cuestionario.declaradoEn, vigente: !Object.keys(validarRespuestas(cuestionario.respuestas, d.sexo_biologico).errores).length }
       : null,
-    estudios: { total: estudios.length, requierenRevision: estudios.filter((e) => e.estado === 'REQUIERE_REVISION').length },
+    estudios: {
+      total: estudios.length,
+      requierenRevision: estudios.filter((e) => e.estado === 'REQUIERE_REVISION').length,
+      detenidos: estudios.filter((e) => e.estado === 'DETENIDO').length,
+      vigentes: estudios.filter((e) => e.estado === 'PROCESADO' && e.vigente).length,
+    },
     orientacion: ultimaOrientacion(id) ?? null,
     intervalo: verificarIntervalosDonante(id, d.sexo_biologico),
+    habilitacion: habilitacionParaTurnos(id, d.sexo_biologico),
     turno: turnoActivo(id),
     donaciones: donacionesDelDonante(id).length,
     avisosSinLeer: uno<{ n: number }>('SELECT COUNT(*) AS n FROM notificacion WHERE id_donante = ? AND leida_en IS NULL', [id])!.n,
@@ -172,7 +194,7 @@ rutasDonante.get('/centros', (_req, res) => {
 rutasDonante.get('/centros/:id/disponibilidad', (req, res) => {
   const d = donante(req);
   res.json({
-    fechaHabilitacion: verificarIntervalosDonante(d.id_donante, d.sexo_biologico).fechaHabilitacion,
+    fechaHabilitacion: habilitacionParaTurnos(d.id_donante, d.sexo_biologico).desde,
     dias: consultarDisponibilidad(idParam(req.params.id)),
   });
 });

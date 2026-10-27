@@ -2,7 +2,8 @@ import { ejecutar, todos, transaccion, uno } from '../db.ts';
 import { auditar } from '../auditoria.ts';
 import type { Rol, UsuarioSesion } from '../auth.ts';
 import { cifrarJson, descifrarJson } from '../seguridad.ts';
-import { ErrorHttp, ahoraIso, edadEn, esFecha, fechaHoraLocal, fechaLocal } from '../util.ts';
+import { ErrorHttp, ahoraIso, edadEn, esFecha, fechaHoraLocal, fechaLocal, sumarMeses } from '../util.ts';
+import { configReglas } from './configuracion.ts';
 import { consentimientos, obtenerDonante, perfilPublico } from './donantes.ts';
 import { ultimoCuestionario } from './cuestionario.ts';
 import { listarEstudios } from './procesadorEstudios.ts';
@@ -17,18 +18,26 @@ import { donacionesDelDonante } from './autoexclusion.ts';
 export function buscarPostulantes(criterio: string) {
   const q = criterio.trim();
   if (q.length < 2) throw new ErrorHttp(422, 'CRITERIO_CORTO', 'Ingresá al menos 2 caracteres o el DNI.');
-  const filas = todos<{ id_donante: number; dni: string; nombres: string; apellidos: string; grupo_abo: string | null; factor_rh: string | null; localidad: string; resultado: string | null }>(
+  // Solo se cuentan estados de los estudios (sin datos clínicos), para marcar los que hay que mirar.
+  const limite = sumarMeses(fechaLocal(), -configReglas().parametros.vigencia_estudios_meses);
+  const filas = todos<{ id_donante: number; dni: string; nombres: string; apellidos: string; grupo_abo: string | null; factor_rh: string | null; localidad: string; resultado: string | null; vencidos: number; a_revisar: number }>(
     `SELECT d.id_donante, d.dni, d.nombres, d.apellidos, d.grupo_abo, d.factor_rh, d.localidad,
-            (SELECT o.resultado FROM orientacion o WHERE o.id_donante = d.id_donante ORDER BY o.id_orientacion DESC LIMIT 1) AS resultado
+            (SELECT o.resultado FROM orientacion o WHERE o.id_donante = d.id_donante ORDER BY o.id_orientacion DESC LIMIT 1) AS resultado,
+            (SELECT COUNT(*) FROM estudio_medico e WHERE e.id_donante = d.id_donante
+               AND (e.motivo_detencion = 'VENCIDO' OR (e.estado_procesamiento = 'PROCESADO' AND e.fecha_estudio < ?))) AS vencidos,
+            (SELECT COUNT(*) FROM estudio_medico e WHERE e.id_donante = d.id_donante
+               AND (e.estado_procesamiento = 'REQUIERE_REVISION'
+                    OR (e.estado_procesamiento = 'DETENIDO' AND e.motivo_detencion <> 'VENCIDO'))) AS a_revisar
      FROM donante d
      WHERE d.dni = ? OR (d.nombres || ' ' || d.apellidos) LIKE ? OR (d.apellidos || ' ' || d.nombres) LIKE ?
      ORDER BY d.apellidos LIMIT 25`,
-    [q.replace(/\D/g, '') || q, `%${q}%`, `%${q}%`],
+    [limite, q.replace(/\D/g, '') || q, `%${q}%`, `%${q}%`],
   );
   return filas.map((f) => ({
     id: f.id_donante, dni: f.dni, nombre: `${f.apellidos}, ${f.nombres}`,
     grupo: f.grupo_abo && f.factor_rh ? `${f.grupo_abo}${f.factor_rh}` : null,
     localidad: f.localidad, ultimaOrientacion: f.resultado,
+    estudios: { vencidos: f.vencidos, aRevisar: f.a_revisar },
   }));
 }
 

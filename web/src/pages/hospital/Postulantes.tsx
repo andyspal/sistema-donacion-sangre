@@ -4,7 +4,7 @@ import { api, ApiError, type ResultadoOrientacion } from '../../api';
 import { ETIQUETA_RESULTADO, TONO_RESULTADO } from '../../formato';
 import { Alerta, Boton, Encabezado, Entrada, Icono, Insignia, Tarjeta } from '../../ui';
 
-interface Resultado { id: number; dni: string; nombre: string; grupo: string | null; localidad: string; ultimaOrientacion: ResultadoOrientacion | null }
+interface Resultado { id: number; dni: string; nombre: string; grupo: string | null; localidad: string; ultimaOrientacion: ResultadoOrientacion | null; estudios: { vencidos: number; aRevisar: number } }
 
 export function Postulantes() {
   const [q, setQ] = useState('');
@@ -51,6 +51,8 @@ export function Postulantes() {
                   <span className="flex gap-1.5">
                     {r.grupo && <Insignia tono="sangre">{r.grupo}</Insignia>}
                     {r.ultimaOrientacion && <Insignia tono={TONO_RESULTADO[r.ultimaOrientacion]}>{ETIQUETA_RESULTADO[r.ultimaOrientacion]}</Insignia>}
+                    {r.estudios.vencidos > 0 && <Insignia tono="sangre">Estudio vencido</Insignia>}
+                    {r.estudios.aRevisar > 0 && <Insignia tono="ambar">Estudio a revisar</Insignia>}
                   </span>
                 </Link>
               </li>

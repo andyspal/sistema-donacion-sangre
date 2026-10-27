@@ -4,7 +4,7 @@ import type { UsuarioSesion } from '../auth.ts';
 import { URL_PUBLICA } from '../config.ts';
 import { ErrorHttp, ahoraIso, esFecha, fechaLocal, normalizar } from '../util.ts';
 import { verificarIntervalosDonante } from './intervalos.ts';
-import { enviarAviso, reintentarAviso } from './mensajeria.ts';
+import { entregar, registrarAviso, reintentarAviso } from './mensajeria.ts';
 
 export const COMPONENTES = ['GLOBULOS_ROJOS', 'PLAQUETAS', 'PLASMA'] as const;
 export const GRUPOS = ['O', 'A', 'B', 'AB'] as const;
@@ -130,6 +130,12 @@ export function monitorearStock(idCentro: number) {
     );
     if (u.disponibles < u.minimo_unidades && !activa) {
       generarAlerta(idCentro, u);
+    } else if (u.disponibles < u.minimo_unidades && activa) {
+      // El faltante sigue: se suma a quien haya quedado habilitado desde la última revisión.
+      const cv = uno<{ id_convocatoria: number }>(
+        `SELECT id_convocatoria FROM convocatoria WHERE id_alerta_stock = ? AND estado <> 'CERRADA'`, [activa.id_alerta_stock],
+      );
+      if (cv) convocarPendientes(idCentro, cv.id_convocatoria, u.grupo_abo, u.factor_rh);
     } else if (u.disponibles >= u.minimo_unidades && activa) {
       transaccion(() => {
         ejecutar(`UPDATE alerta_stock SET estado = 'ATENDIDA', atendida_en = ? WHERE id_alerta_stock = ?`, [ahoraIso(), activa.id_alerta_stock]);
@@ -168,30 +174,55 @@ const NOMBRE_COMPONENTE: Record<string, string> = {
 };
 
 function generarAlerta(idCentro: number, u: { id_umbral_stock: number; grupo_abo: string; factor_rh: string; disponibles: number }) {
-  const { idConvocatoria, destinatarios, centro } = transaccion(() => {
+  const idConvocatoria = transaccion(() => {
     const { id: idAlerta } = ejecutar(
       `INSERT INTO alerta_stock (id_umbral_stock, cantidad_detectada, estado, detectada_en) VALUES (?, ?, 'ACTIVA', ?)`,
       [u.id_umbral_stock, u.disponibles, ahoraIso()],
     );
-    const destinatarios = seleccionarCandidatos(idCentro, u.grupo_abo, u.factor_rh);
-    const { id: idConvocatoria } = ejecutar(
-      `INSERT INTO convocatoria (id_alerta_stock, id_centro, estado, creada_en) VALUES (?, ?, ?, ?)`,
-      [idAlerta, idCentro, destinatarios.length ? 'ABIERTA' : 'SIN_DESTINATARIOS', ahoraIso()],
+    const { id } = ejecutar(
+      `INSERT INTO convocatoria (id_alerta_stock, id_centro, estado, creada_en) VALUES (?, ?, 'SIN_DESTINATARIOS', ?)`,
+      [idAlerta, idCentro, ahoraIso()],
     );
-    auditar(null, 'GENERAR_CONVOCATORIA', 'convocatoria', idConvocatoria, { destinatarios: destinatarios.length });
-    const centro = uno<{ nombre: string }>('SELECT nombre FROM centro_hemoterapia WHERE id_centro = ?', [idCentro])!.nombre;
-    return { idConvocatoria, destinatarios, centro };
+    return id;
   });
+  const destinatarios = convocarPendientes(idCentro, idConvocatoria, u.grupo_abo, u.factor_rh);
+  auditar(null, 'GENERAR_CONVOCATORIA', 'convocatoria', idConvocatoria, { destinatarios });
+}
 
-  // RF23 — un aviso por destinatario, sin información sensible (RNF03).
-  for (const d of destinatarios) {
-    enviarAviso({
+/**
+ * Avisa a los candidatos que todavía no recibieron esta convocatoria: al crearla y en cada
+ * revisión mientras dure el faltante, así también llega a quien se registró o quedó
+ * habilitado después. Nadie recibe dos veces el mismo llamado. Devuelve cuántos sumó.
+ */
+function convocarPendientes(idCentro: number, idConvocatoria: number, grupo: string, rh: string): number {
+  const { destinatarios, centro } = transaccion(() => {
+    const avisados = new Set(todos<{ id_donante: number }>(
+      'SELECT id_donante FROM notificacion WHERE id_convocatoria = ?', [idConvocatoria],
+    ).map((n) => n.id_donante));
+    const destinatarios = seleccionarCandidatos(idCentro, grupo, rh).filter((c) => !avisados.has(c.id_donante));
+    if (destinatarios.length) {
+      ejecutar(`UPDATE convocatoria SET estado = 'ABIERTA' WHERE id_convocatoria = ? AND estado = 'SIN_DESTINATARIOS'`, [idConvocatoria]);
+    }
+    const centro = uno<{ nombre: string }>('SELECT nombre FROM centro_hemoterapia WHERE id_centro = ?', [idCentro])!.nombre;
+    return { destinatarios, centro };
+  });
+  if (!destinatarios.length) return 0;
+
+  // RF23 — un aviso por destinatario, sin información sensible (RNF03): queda en la bandeja
+  // de avisos de la PWA y además se envía por correo, de a uno para no saturar el servidor SMTP.
+  const avisos = destinatarios.map((d) => ({
+    destino: d.email!,
+    id: registrarAviso({
       idDonante: d.id_donante, idConvocatoria, tipo: 'CONVOCATORIA', canal: 'EMAIL', destino: d.email!,
       asunto: `${centro} necesita donantes`,
       cuerpo: `Hola ${d.nombres}: ${centro} necesita donantes como vos esta semana. Si podés ayudar, reservá tu turno desde el enlace.`,
       enlace: `${URL_PUBLICA}/app/turnos?centro=${idCentro}&convocatoria=${idConvocatoria}`,
-    });
-  }
+    }),
+  }));
+  void (async () => {
+    for (const a of avisos) await entregar(a.id, a.destino);
+  })().catch((error) => console.error('Convocatoria:', (error as Error).message));
+  return destinatarios.length;
 }
 
 export function listarConvocatorias(idCentro: number) {
@@ -223,7 +254,7 @@ export function listarConvocatorias(idCentro: number) {
 }
 
 /** Reintenta los envíos fallidos de una convocatoria (flujo alternativo de CU05). */
-export function reintentarEnvios(usuario: UsuarioSesion & { idCentro: number }, idConvocatoria: number) {
+export async function reintentarEnvios(usuario: UsuarioSesion & { idCentro: number }, idConvocatoria: number) {
   const cv = uno<{ id_centro: number }>('SELECT id_centro FROM convocatoria WHERE id_convocatoria = ?', [idConvocatoria]);
   if (!cv || cv.id_centro !== usuario.idCentro) throw new ErrorHttp(404, 'NO_ENCONTRADO', 'La convocatoria no existe.');
   const fallidos = todos<{ id_notificacion: number; email: string }>(
@@ -233,7 +264,7 @@ export function reintentarEnvios(usuario: UsuarioSesion & { idCentro: number }, 
   );
   let enviados = 0;
   for (const f of fallidos) {
-    if (reintentarAviso(f.id_notificacion, f.email) === 'ENVIADO') enviados++;
+    if (await reintentarAviso(f.id_notificacion, f.email) === 'ENVIADO') enviados++;
   }
   auditar(usuario.idUsuario, 'REINTENTAR_ENVIOS', 'convocatoria', idConvocatoria, { enviados, total: fallidos.length });
   return { reintentados: fallidos.length, enviados };

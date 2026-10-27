@@ -3,11 +3,14 @@ import { useCarga, type Resumen } from '../../api';
 import { ETIQUETA_RESULTADO, TONO_RESULTADO, fechaHora, fechaLarga, hoy, instante } from '../../formato';
 import { Alerta, Cargando, Encabezado, Icono, Insignia, Tarjeta, cx } from '../../ui';
 
-type Estado = 'hecho' | 'pendiente' | 'atencion' | 'opcional';
+type Estado = 'hecho' | 'pendiente' | 'atencion' | 'opcional' | 'espera';
 interface Paso { titulo: string; detalle: string; estado: Estado; a: string; accion: string; insignia?: { texto: string; tono: 'lima' | 'ambar' | 'cielo' } }
 
 function pasos(r: Resumen): Paso[] {
   const orientacionDesactualizada = !!(r.orientacion && r.cuestionario && r.cuestionario.declaradoEn > r.orientacion.generadaEn);
+  // Con un diferimiento vigente el turno queda en espera: no se sugiere como siguiente paso.
+  const { bloqueo, desde } = r.habilitacion;
+  const enEspera = bloqueo?.codigo === 'DIFERIDO_SIN_FECHA' || (!bloqueo && desde > hoy());
   return [
     {
       titulo: 'Consentimiento de datos de salud',
@@ -23,10 +26,11 @@ function pasos(r: Resumen): Paso[] {
     },
     {
       titulo: 'Estudios médicos',
-      detalle: r.estudios.total
-        ? `${r.estudios.total} cargado${r.estudios.total > 1 ? 's' : ''}${r.estudios.requierenRevision ? ` · ${r.estudios.requierenRevision} en revisión` : ''}.`
-        : 'Opcional: un análisis reciente mejora la orientación.',
-      estado: r.estudios.total ? 'hecho' : 'opcional', a: '/app/estudios', accion: r.estudios.total ? 'Ver' : 'Adjuntar',
+      detalle: !r.estudios.total ? 'Opcional: un análisis reciente mejora la orientación.'
+        : !r.estudios.vigentes ? 'Ninguno vigente para la orientación: subí un análisis reciente.'
+        : `${r.estudios.vigentes} vigente${r.estudios.vigentes > 1 ? 's' : ''}${r.estudios.requierenRevision ? ` · ${r.estudios.requierenRevision} en revisión` : ''}.`,
+      estado: r.estudios.vigentes ? 'hecho' : 'opcional',
+      a: '/app/estudios', accion: r.estudios.total ? 'Ver' : 'Adjuntar',
     },
     {
       titulo: 'Orientación previa',
@@ -38,8 +42,9 @@ function pasos(r: Resumen): Paso[] {
     },
     {
       titulo: 'Turno de donación',
-      detalle: r.turno ? `${fechaHora(r.turno.inicio)} · ${r.turno.centro.nombre}` : 'Elegí centro, día y horario.',
-      estado: r.turno ? 'hecho' : 'pendiente', a: '/app/turnos', accion: r.turno ? 'Ver' : 'Reservar',
+      detalle: r.turno ? `${fechaHora(r.turno.inicio)} · ${r.turno.centro.nombre}`
+        : !enEspera ? 'Elegí centro, día y horario.' : bloqueo ? 'Por ahora no podés reservar: mirá tu orientación.' : `Podés reservar desde el ${fechaLarga(desde)}.`,
+      estado: r.turno ? 'hecho' : enEspera ? 'espera' : 'pendiente', a: '/app/turnos', accion: r.turno || enEspera ? 'Ver' : 'Reservar',
     },
   ];
 }
@@ -47,8 +52,9 @@ function pasos(r: Resumen): Paso[] {
 const MARCA: Record<Estado, string> = {
   hecho: 'bg-verde text-white',
   pendiente: 'border border-tenue/50 text-tenue',
-  atencion: 'bg-ambar text-fondo',
+  atencion: 'bg-ambar text-white',
   opcional: 'border border-dashed border-tenue/50 text-tenue',
+  espera: 'border border-ambar/60 text-ambar',
 };
 
 export function Tablero() {
@@ -58,7 +64,11 @@ export function Tablero() {
 
   const lista = pasos(r);
   const siguiente = lista.find((p) => p.estado === 'pendiente' || p.estado === 'atencion');
-  const habilitado = r.intervalo.fechaHabilitacion <= hoy();
+  const { bloqueo, desde, motivo } = r.habilitacion;
+  const habilitado = !bloqueo && desde <= hoy();
+  const titulo = bloqueo
+    ? bloqueo.codigo === 'DIFERIDO_SIN_FECHA' ? 'Por ahora te recomendamos esperar' : 'Pedí tu orientación para reservar'
+    : habilitado ? 'Podés donar desde hoy' : `Podrás donar desde el ${fechaLarga(desde)}`;
 
   return (
     <>
@@ -67,12 +77,11 @@ export function Tablero() {
       <div className="grid gap-3 sm:grid-cols-2">
         <Tarjeta className={cx(habilitado ? 'border-verde/30' : 'border-ambar/30')}>
           <div className="flex items-center justify-between">
-            <p className="text-sm text-tenue">Intervalo entre donaciones</p>
+            <p className="text-sm text-tenue">Cuándo podés donar</p>
             {r.grupo && <Insignia tono="sangre"><Icono nombre="gota" className="size-3" />{r.grupo}</Insignia>}
           </div>
-          <p className={cx('mt-2 text-lg font-semibold', habilitado ? 'text-verde' : 'text-ambar')}>
-            {habilitado ? 'Podés donar desde hoy' : `Podrás donar desde el ${fechaLarga(r.intervalo.fechaHabilitacion)}`}
-          </p>
+          <p className={cx('mt-2 text-lg font-semibold', habilitado ? 'text-verde' : 'text-ambar')}>{titulo}</p>
+          {(bloqueo || motivo) && <p className="mt-1 text-sm">{bloqueo?.mensaje ?? motivo}</p>}
           <p className="mt-1 text-sm text-tenue">
             {r.intervalo.donacionesUltimoAnio} de {r.intervalo.maximoAnual} donaciones en los últimos 12 meses
             {r.intervalo.ultimaDonacion ? ` · última el ${r.intervalo.ultimaDonacion.split('-').reverse().join('/')}` : ''}

@@ -44,9 +44,20 @@ estas cuentas.
 
 - `server/data/estudio-ejemplo-lucia.pdf` es un informe ficticio (se regenera con fecha reciente en cada `npm run seed`).
   Subilo con la cuenta de Lucía: se extraen hemoglobina, hematocrito, plaquetas y serologías.
+- Lucía ya tiene cargado un análisis de hace 8 meses (`estudio-ejemplo-vencido.pdf`): aparece como **«Informe
+  vencido — análisis detenido»** en su panel y en el legajo que ve el médico.
 - Con un análisis propio: registrate con **tu DNI** (el sistema verifica que el DNI del informe coincida con el del
-  donante). Solo se usan para orientar los estudios de los **últimos 6 meses**; los más viejos se muestran pero no se
-  consideran.
+  donante). Solo se usan para orientar los estudios de los **últimos 6 meses**; los vencidos no se analizan.
+
+### Correo (opcional)
+
+Copiá `.env.example` como `.env` en la raíz y completá el servidor de correo. Con `SMTP_HOST` y sus credenciales,
+las confirmaciones, recordatorios y cancelaciones de turnos y las convocatorias salen por ese servidor. Sin SMTP,
+cada correo se guarda como `.eml` en `server/data/correos/` (se abre con cualquier cliente de correo).
+
+Con una cuenta de Gmail: activá la verificación en dos pasos, creá una **contraseña de aplicación** en la cuenta de
+Google y usá `smtp.gmail.com`, puerto `465`, `SMTP_SECURE=true`, la cuenta como usuario y como remitente. Conviene
+una cuenta creada para el proyecto, no una personal.
 
 ## Qué incluye
 
@@ -59,23 +70,26 @@ estas cuentas.
 | Inicio de sesión | RF03 | `/ingresar` |
 | Tablero «tu camino para donar» con el siguiente paso | — | `/app` |
 | Cuestionario de salud (< 3 min, preguntas condicionales, versionado) | RF04 | `/app/cuestionario` |
+| Sugerencia de cargar el análisis clínico al terminar el cuestionario | RF05 | `/app/cuestionario/estudio` |
 | Carga de estudios PDF/JPG/PNG, cifrados en disco | RF05 | `/app/estudios` |
-| Interpretación de estudios; si no se puede, «requiere revisión» | RF06 | `/app/estudios` |
+| Interpretación de estudios PDF con texto; chequeos previos que detienen el análisis | RF06 | `/app/estudios` |
+| Preferencias de correo de turnos (confirmación/cancelación y recordatorio 24 o 48 h antes) | RF12 | `/app/perfil` |
 | Verificación de intervalos (8/12 semanas, máx. 4/3 por año) | RF07 | Orientación, turnos, historial |
 | Orientación con motor de reglas configurable | RF08, RNF11 | `/app/orientacion` (CU01) |
 | Resultado favorable / diferimiento temporal (con fecha si es calculable) / revisión médica + aclaración legal | RF09 | `/app/orientacion` |
 | Historial de donaciones y evaluaciones | RF10 | `/app/historial` |
 | Consulta de centros, fechas y horarios con cupo | RF11 | `/app/turnos` (CU02) |
-| Reserva transaccional del cupo (409 si se ocupó) y confirmación por mensajería | RF12, RNF08 | `/app/turnos` |
+| Reserva transaccional del cupo (409 si se ocupó) y confirmación por correo | RF12, RNF08 | `/app/turnos` |
 | Autoexclusión confidencial con acuse (sin duplicados) | RF14 | `/app/autoexclusion` (CU06) |
-| Bandeja de avisos (convocatorias y confirmaciones) | RF23 | `/app/avisos` |
+| Bandeja de avisos (convocatorias, confirmaciones y recordatorios; también por correo) | RF23 | `/app/avisos` |
 
 ### Panel hospitalario mínimo
 
 | Función | Requerimientos | Dónde |
 |---|---|---|
 | Agenda del día y generación de franjas/cupos | RF13 | `/hospital` |
-| Búsqueda de postulantes y legajo filtrado por rol | RF15, RNF02 | `/hospital/postulantes` |
+| Búsqueda de postulantes y legajo filtrado por rol, con marca de estudios vencidos o a revisar | RF15, RNF02 | `/hospital/postulantes` |
+| Estudios del postulante con las mismas leyendas que ve el donante (vencido, detenido, a revisar) | RF06 | Legajo |
 | Registro de evaluación presencial (APTO / DIFERIDO con motivo y plazo) | RF16 | Legajo (CU03) |
 | Registro de donación | RF17 | Legajo |
 | Inventario por componente, grupo y Rh, lotes y vencimientos, sin negativos | RF18, RF19, RNF08 | `/hospital/inventario` (CU04) |
@@ -85,7 +99,21 @@ estas cuentas.
 
 La convocatoria (CU05) selecciona donantes con el **mismo grupo y Rh**, que **autorizaron** recibir convocatorias,
 con **intervalo cumplido**, **última orientación favorable**, **misma localidad** que el centro, datos de contacto
-completos y **sin turno ya reservado**. Se dispara al actualizar el stock y con un chequeo programado cada hora.
+completos y **sin turno ya reservado**. Se dispara al actualizar el stock y con un chequeo programado cada hora, y
+llega **por correo y a la bandeja de avisos**.
+
+### Análisis de estudios: cuándo se detiene
+
+Antes de interpretar un estudio se hacen chequeos. Si alguno falla, el estudio queda **«Análisis detenido»** con el motivo, y el donante y el médico ven la misma leyenda:
+
+| Caso | Resultado |
+|---|---|
+| Fecha declarada o fecha del PDF con más de 6 meses | Detenido: **vencido** (no se interpreta) |
+| Fecha posterior a hoy | Detenido |
+| DNI del estudio distinto al del donante | Detenido |
+| Archivo ya cargado por el donante | Se rechaza la carga |
+| Foto sin fecha declarada | Se pide la fecha (sin ella no se puede verificar la vigencia) |
+| PDF protegido, dañado, escaneado o de más de 10 páginas, y fotos | Requiere revisión del personal |
 
 ## Arquitectura
 
@@ -94,7 +122,8 @@ web/      PWA React + TypeScript + Tailwind (Vite)        ← Frontend: no conti
 server/   API REST Node + Express (TypeScript nativo)     ← Backend en capas
   src/routes/      auth, donante, hospital               (API REST)
   src/services/    orientación (CU01), turnos (CU02), hospital (CU03), inventario y convocatorias (CU04/CU05),
-                   autoexclusión (CU06), motor de reglas, intervalos, procesador de estudios, mensajería
+                   autoexclusión (CU06), motor de reglas, intervalos, procesador de estudios, mensajería,
+                   correo y recordatorios de turno
   src/schema.sql   modelo relacional del DER
   config/          cuestionario.json y reglas-orientacion.json (RNF11)
   data/            base SQLite, clave de cifrado, estudios cifrados y bandeja de mensajería (no versionar)
@@ -132,6 +161,10 @@ sin reiniciar ni tocar otros módulos.
 | `DATA_KEY` | Clave AES de 32 bytes en base64 (en producción, desde un gestor de secretos) | se genera en `data/` |
 | `PUBLIC_URL` | URL de la PWA para los enlaces de las notificaciones | `http://localhost:5173` |
 | `MENSAJERIA_FALLA` | `1` simula la caída del proveedor de mensajería (flujo alternativo de CU05) | — |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` | Servidor de correo saliente | sin SMTP: `.eml` en `data/correos/` |
+| `CORREO_REMITENTE` | Remitente de los correos | `HemoRed <no-responder@hemored.test>` |
+
+Las variables se pueden poner en un archivo `.env` en la raíz (ver `.env.example`); nunca se versiona.
 
 ## Decisiones y simplificaciones del MVP
 
@@ -139,10 +172,11 @@ sin reiniciar ni tocar otros módulos.
 |---|---|---|
 | PostgreSQL | SQLite embebido (`node:sqlite`), mismo esquema relacional del DER | Cero instalación; el esquema es portable |
 | FastAPI o Node.js | Node.js + Express con TypeScript nativo | Un solo lenguaje en front y back |
-| OCR/IA de estudios | Extracción del texto de PDFs (MuPDF) reconstruyendo las filas por posición + patrones por unidad | Funciona sin servicios externos; las imágenes y PDFs escaneados quedan «requiere revisión» |
-| SMS / WhatsApp / correo | Adaptador simulado: `server/data/bandeja-salida.log` + bandeja de avisos en la PWA | Sin credenciales de proveedores |
+| OCR/IA de estudios | Extracción del texto de PDFs (MuPDF) reconstruyendo las filas por posición + patrones por unidad | Funciona sin servicios externos; las fotos y PDFs escaneados quedan «requiere revisión». La lectura con IA se trabaja por separado |
+| Correo | SMTP configurable (nodemailer); sin SMTP, archivos `.eml` | Funciona sin credenciales en desarrollo |
+| SMS / WhatsApp | Adaptador simulado: `server/data/bandeja-salida.log` | Sin credenciales de proveedores |
 | Cercanía geográfica | Misma localidad que el centro | Sin geocodificación |
 
-Pendiente para próximas iteraciones: OCR de imágenes / modelo de IA, pasarelas de mensajería reales, respaldo
+Pendiente para próximas iteraciones: pasarelas reales de SMS/WhatsApp, respaldo
 automático cada 24 h (RNF10), HL7/FHIR y REDOS, geolocalización, despliegue con Docker y PostgreSQL, HTTPS detrás de
 proxy, y pruebas de carga (RNF04/RNF05) y de usabilidad (RNF06).

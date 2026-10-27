@@ -41,7 +41,9 @@ CREATE TABLE IF NOT EXISTS donante (
   localidad         TEXT    NOT NULL,
   grupo_abo         TEXT    CHECK (grupo_abo IN ('A','B','AB','O')),
   factor_rh         TEXT    CHECK (factor_rh IN ('+','-')),
-  creado_en         TEXT    NOT NULL
+  creado_en         TEXT    NOT NULL,
+  correo_turnos       INTEGER NOT NULL DEFAULT 1 CHECK (correo_turnos IN (0,1)),          -- ext: preferencia de correo de turnos
+  recordatorio_horas  INTEGER NOT NULL DEFAULT 24 CHECK (recordatorio_horas IN (0,24,48))  -- ext: 0 = sin recordatorio
 );
 
 CREATE TABLE IF NOT EXISTS personal (
@@ -80,9 +82,12 @@ CREATE TABLE IF NOT EXISTS estudio_medico (
   ubicacion_cifrada     TEXT    NOT NULL,
   fecha_estudio         TEXT,
   estado_procesamiento  TEXT    NOT NULL DEFAULT 'PENDIENTE'
-                        CHECK (estado_procesamiento IN ('PENDIENTE','PROCESADO','REQUIERE_REVISION')),
+                        CHECK (estado_procesamiento IN ('PENDIENTE','PROCESADO','REQUIERE_REVISION','DETENIDO')),
   parametros_cifrados   TEXT,   -- ext: parámetros clínicos extraídos (JSON cifrado)
   observacion           TEXT,   -- ext: motivo de revisión (sin datos clínicos)
+  metodo_extraccion     TEXT    CHECK (metodo_extraccion IN ('TEXTO','NINGUNO')),  -- ext
+  motivo_detencion      TEXT,   -- ext: chequeo previo que frenó el análisis (VENCIDO, DUPLICADO, ...)
+  huella_archivo        TEXT,   -- ext: HMAC-SHA256 del archivo, para detectar duplicados
   cargado_en            TEXT    NOT NULL
 );
 
@@ -190,15 +195,16 @@ CREATE TABLE IF NOT EXISTS notificacion (
   id_notificacion  INTEGER PRIMARY KEY,
   id_convocatoria  INTEGER REFERENCES convocatoria(id_convocatoria),
   id_donante       INTEGER NOT NULL REFERENCES donante(id_donante),
-  tipo             TEXT    NOT NULL CHECK (tipo IN ('CONVOCATORIA','CONFIRMACION_TURNO','CANCELACION_TURNO')),  -- ext
-  canal            TEXT    NOT NULL CHECK (canal IN ('EMAIL','SMS','WHATSAPP')),
+  tipo             TEXT    NOT NULL CHECK (tipo IN ('CONVOCATORIA','CONFIRMACION_TURNO','RECORDATORIO_TURNO','CANCELACION_TURNO')),  -- ext
+  canal            TEXT    NOT NULL CHECK (canal IN ('EMAIL','SMS','WHATSAPP','APP')),  -- ext: APP = solo aviso en la PWA
   asunto           TEXT    NOT NULL,  -- ext
   cuerpo           TEXT    NOT NULL,  -- ext: nunca contiene datos clínicos (RNF03)
   enlace           TEXT,              -- ext
   estado           TEXT    NOT NULL CHECK (estado IN ('PENDIENTE','ENVIADO','FALLIDO')),
   enviada_en       TEXT,
   creada_en        TEXT    NOT NULL,
-  leida_en         TEXT               -- ext: bandeja de avisos dentro de la PWA
+  leida_en         TEXT,              -- ext: bandeja de avisos dentro de la PWA
+  id_turno         INTEGER REFERENCES turno(id_turno)  -- ext: turno al que se refiere (evita recordatorios repetidos)
 );
 
 CREATE TABLE IF NOT EXISTS auditoria (

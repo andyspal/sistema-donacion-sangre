@@ -96,8 +96,8 @@ rutasHospital.get('/convocatorias', (req, res) => {
   res.json(listarConvocatorias(personal(req).idCentro));
 });
 
-rutasHospital.post('/convocatorias/:id/reintentar', gestionInventario, (req, res) => {
-  res.json(reintentarEnvios(personal(req), id(req.params.id)));
+rutasHospital.post('/convocatorias/:id/reintentar', gestionInventario, async (req, res) => {
+  res.json(await reintentarEnvios(personal(req), id(req.params.id)));
 });
 
 rutasHospital.post('/monitor/ejecutar', gestionInventario, (req, res) => {

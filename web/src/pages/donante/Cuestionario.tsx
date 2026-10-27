@@ -105,7 +105,7 @@ export function Cuestionario() {
     try {
       const limpias = Object.fromEntries(visibles.map((p) => [p.id, r[p.id]]));
       await api('/donante/cuestionario', 'POST', { respuestas: limpias });
-      navegar('/app/orientacion', { state: { solicitar: true } });
+      navegar('/app/cuestionario/estudio');
     } catch (err) {
       const ae = err as ApiError;
       const errs = ae.detalle?.errores ?? {};
@@ -125,7 +125,7 @@ export function Cuestionario() {
 
       {!perfil.consentimientos.DATOS_SALUD.otorgado ? <ConsentimientoRequerido onOtorgado={recargar} /> : (
         <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
-          <div className="sticky top-14 z-10 -mx-4 bg-fondo px-4 py-2">
+          <div className="sticky top-[61px] z-10 -mx-4 bg-fondo px-4 py-2 md:top-1">
             <div className="flex items-center justify-between text-xs text-tenue">
               <span>{completas} de {visibles.length} respondidas</span>
               <span>Declaración jurada</span>
@@ -154,7 +154,7 @@ export function Cuestionario() {
 
           {mensaje && <Alerta tono="sangre">{mensaje}</Alerta>}
           <p className="text-xs text-tenue">{def.descripcion}</p>
-          <Boton type="submit" cargando={enviando} className="sm:self-end">Guardar y obtener mi orientación</Boton>
+          <Boton type="submit" cargando={enviando} className="sm:self-end">Guardar y continuar</Boton>
         </form>
       )}
     </>
