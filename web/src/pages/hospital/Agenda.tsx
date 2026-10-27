@@ -22,7 +22,7 @@ function GenerarAgenda({ onCreada }: { onCreada: () => void }) {
   const [enviando, setEnviando] = useState(false);
   const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   return (
-    <details className="mt-6 rounded-2xl border border-borde bg-superficie p-4">
+    <details className="mt-6 rounded-xl border border-borde bg-superficie p-4">
       <summary className="cursor-pointer font-medium">Configurar días, horarios y cupos</summary>
       <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Campo etiqueta="Desde" id="g-desde"><Entrada id="g-desde" type="date" min={hoy()} value={f.desde} onChange={(e) => setF({ ...f, desde: e.target.value })} /></Campo>
@@ -37,7 +37,7 @@ function GenerarAgenda({ onCreada }: { onCreada: () => void }) {
           const activo = f.diasSemana.includes(i);
           return (
             <button key={d} type="button" aria-pressed={activo} onClick={() => setF({ ...f, diasSemana: activo ? f.diasSemana.filter((x) => x !== i) : [...f.diasSemana, i] })}
-              className={cx('rounded-lg border px-3 py-1.5 text-sm cursor-pointer', activo ? 'border-lima bg-lima-suave text-lima' : 'border-borde text-tenue')}>{d}</button>
+              className={cx('rounded-lg border px-3 py-1.5 text-sm cursor-pointer', activo ? 'border-primario bg-primario-suave text-primario' : 'border-borde text-tenue')}>{d}</button>
           );
         })}
       </div>
@@ -90,7 +90,7 @@ export function Agenda() {
                 <ul className="grid gap-1.5">
                   {f.turnos.map((t) => (
                     <li key={t.id}>
-                      <Link to={`/hospital/postulantes/${t.idDonante}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-superficie-2 px-3 py-2 hover:bg-borde/60">
+                      <Link to={`/hospital/postulantes/${t.idDonante}`} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-superficie-2 px-3 py-2 hover:bg-borde/60">
                         <span><span className="font-medium">{t.nombre}</span> <span className="text-sm text-tenue">· DNI {t.dni}</span></span>
                         <span className="flex gap-1.5">
                           {t.ultimaOrientacion && <Insignia tono={TONO_RESULTADO[t.ultimaOrientacion]}>{ETIQUETA_RESULTADO[t.ultimaOrientacion]}</Insignia>}

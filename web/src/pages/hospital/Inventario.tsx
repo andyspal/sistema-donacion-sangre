@@ -145,12 +145,12 @@ export function Inventario() {
                   const pct = f.minimo ? Math.min(100, (f.disponibles / (f.minimo * 2)) * 100) : 100;
                   return (
                     <button key={clave(f)} onClick={() => setSel(clave(f))} aria-pressed={sel === clave(f)}
-                      className={cx('flex flex-col items-center gap-1 rounded-xl border p-2.5 transition cursor-pointer',
-                        sel === clave(f) ? 'border-lima' : f.critico ? 'border-sangre/50 bg-sangre-suave' : 'border-borde hover:border-tenue/50')}>
+                      className={cx('flex flex-col items-center gap-1 rounded-lg border p-2.5 transition cursor-pointer',
+                        sel === clave(f) ? 'border-primario' : f.critico ? 'border-sangre/50 bg-sangre-suave' : 'border-borde hover:border-tenue/50')}>
                       <span className="text-xs text-tenue">{f.grupo}{f.rh}</span>
                       <span className={cx('text-xl font-semibold tabular-nums', f.critico && 'text-sangre')}>{f.disponibles}</span>
                       <span className="h-1 w-full rounded-full bg-superficie-2">
-                        <span className={cx('block h-full rounded-full', f.critico ? 'bg-sangre' : 'bg-lima')} style={{ width: `${pct}%` }} />
+                        <span className={cx('block h-full rounded-full', f.critico ? 'bg-sangre' : 'bg-primario')} style={{ width: `${pct}%` }} />
                       </span>
                       <span className="text-[11px] text-tenue">mín {f.minimo ?? '—'}</span>
                     </button>

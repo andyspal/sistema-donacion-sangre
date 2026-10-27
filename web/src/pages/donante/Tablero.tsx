@@ -45,7 +45,7 @@ function pasos(r: Resumen): Paso[] {
 }
 
 const MARCA: Record<Estado, string> = {
-  hecho: 'bg-lima text-fondo',
+  hecho: 'bg-verde text-white',
   pendiente: 'border border-tenue/50 text-tenue',
   atencion: 'bg-ambar text-fondo',
   opcional: 'border border-dashed border-tenue/50 text-tenue',
@@ -65,12 +65,12 @@ export function Tablero() {
       <Encabezado titulo={`Hola, ${r.nombre}`} bajada="Este es tu camino para donar sangre." />
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Tarjeta className={cx(habilitado ? 'border-lima/30' : 'border-ambar/30')}>
+        <Tarjeta className={cx(habilitado ? 'border-verde/30' : 'border-ambar/30')}>
           <div className="flex items-center justify-between">
             <p className="text-sm text-tenue">Intervalo entre donaciones</p>
             {r.grupo && <Insignia tono="sangre"><Icono nombre="gota" className="size-3" />{r.grupo}</Insignia>}
           </div>
-          <p className={cx('mt-2 text-lg font-semibold', habilitado ? 'text-lima' : 'text-ambar')}>
+          <p className={cx('mt-2 text-lg font-semibold', habilitado ? 'text-verde' : 'text-ambar')}>
             {habilitado ? 'Podés donar desde hoy' : `Podrás donar desde el ${fechaLarga(r.intervalo.fechaHabilitacion)}`}
           </p>
           <p className="mt-1 text-sm text-tenue">
@@ -88,7 +88,7 @@ export function Tablero() {
           ) : (
             <>
               <p className="mt-2 text-lg font-semibold">Sin turno reservado</p>
-              <Link to="/app/turnos" className="mt-1 inline-flex items-center gap-1 text-sm text-lima hover:underline">
+              <Link to="/app/turnos" className="mt-1 inline-flex items-center gap-1 text-sm text-primario hover:underline">
                 Reservar un turno <Icono nombre="flecha" className="size-3.5" />
               </Link>
             </>
@@ -97,9 +97,9 @@ export function Tablero() {
       </div>
 
       {siguiente && (
-        <Link to={siguiente.a} className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-lima px-5 py-4 text-fondo hover:brightness-110">
+        <Link to={siguiente.a} className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-primario px-5 py-4 text-white hover:bg-primario-hover">
           <span>
-            <span className="block text-xs font-medium uppercase tracking-wider opacity-70">Siguiente paso</span>
+            <span className="block text-sm font-medium opacity-90">Siguiente paso</span>
             <span className="block text-lg font-semibold">{siguiente.accion}: {siguiente.titulo.toLowerCase()}</span>
           </span>
           <Icono nombre="flecha" className="size-6" />
@@ -110,7 +110,7 @@ export function Tablero() {
         <ol className="divide-y divide-borde">
           {lista.map((p, i) => (
             <li key={p.titulo}>
-              <Link to={p.a} className="flex items-center gap-3.5 px-4 py-3.5 sm:px-5 hover:bg-superficie-2/60 rounded-2xl">
+              <Link to={p.a} className="flex items-center gap-3.5 px-4 py-3.5 sm:px-5 hover:bg-superficie-2/60 rounded-xl">
                 <span className={cx('grid size-7 shrink-0 place-items-center rounded-full text-xs font-semibold', MARCA[p.estado])}>
                   {p.estado === 'hecho' ? <Icono nombre="check" className="size-4" /> : p.estado === 'atencion' ? '!' : i + 1}
                 </span>
@@ -131,7 +131,7 @@ export function Tablero() {
       </Tarjeta>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2 md:hidden">
-        <Link to="/app/autoexclusion" className="flex items-center gap-3 rounded-2xl border border-borde bg-superficie p-4 text-sm">
+        <Link to="/app/autoexclusion" className="flex items-center gap-3 rounded-xl border border-borde bg-superficie p-4 text-sm">
           <Icono nombre="candado" className="text-tenue" /> Autoexclusión confidencial
         </Link>
       </div>

@@ -53,7 +53,7 @@ export function Orientacion() {
           {error.detalle?.camposFaltantes?.length ? (
             <ul className="mt-1 grid gap-1">
               {error.detalle.camposFaltantes.map((c) => FALTANTE[c] && (
-                <li key={c}><Link to={FALTANTE[c].a} className="text-lima hover:underline">{FALTANTE[c].texto} →</Link></li>
+                <li key={c}><Link to={FALTANTE[c].a} className="text-primario hover:underline">{FALTANTE[c].texto} →</Link></li>
               ))}
             </ul>
           ) : null}
@@ -79,21 +79,21 @@ export function Orientacion() {
 
           <div className="flex flex-wrap gap-3">
             {actual.resultado === 'FAVORABLE' && (
-              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-xl bg-lima px-5 py-3 font-semibold text-fondo hover:brightness-110">
+              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg bg-primario px-5 py-3 font-medium text-white hover:bg-primario-hover">
                 <Icono nombre="calendario" className="size-5" /> Reservar mi turno
               </Link>
             )}
             {actual.resultado === 'DIFERIMIENTO_TEMPORAL' && actual.fechaHabilitacionEstimada && (
-              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-xl border border-borde px-5 py-3 hover:border-tenue/60">
+              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg border border-control px-5 py-3 hover:border-tenue/60">
                 <Icono nombre="calendario" className="size-5" /> Reservar desde el {fecha(actual.fechaHabilitacionEstimada)}
               </Link>
             )}
             {actual.resultado === 'REVISION_MEDICA' && (
-              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-xl border border-borde px-5 py-3 hover:border-tenue/60">
+              <Link to="/app/turnos" className="inline-flex items-center gap-2 rounded-lg border border-control px-5 py-3 hover:border-tenue/60">
                 <Icono nombre="calendario" className="size-5" /> Reservar turno para la evaluación
               </Link>
             )}
-            <Link to="/app/cuestionario" className="inline-flex items-center rounded-xl px-4 py-3 text-tenue hover:text-texto">Revisar mis respuestas</Link>
+            <Link to="/app/cuestionario" className="inline-flex items-center rounded-lg px-4 py-3 text-tenue hover:text-texto">Revisar mis respuestas</Link>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -119,13 +119,13 @@ export function Orientacion() {
                   ))}
                 </ul>
               ) : (
-                <p className="mt-1 text-sm">Sin estudios. <Link to="/app/estudios" className="text-lima hover:underline">Adjuntar uno</Link></p>
+                <p className="mt-1 text-sm">Sin estudios. <Link to="/app/estudios" className="text-primario hover:underline">Adjuntar uno</Link></p>
               )}
             </Tarjeta>
           </div>
 
           {anteriores.length > 0 && (
-            <details className="rounded-2xl border border-borde p-4">
+            <details className="rounded-xl border border-borde p-4">
               <summary className="cursor-pointer text-sm text-tenue">Orientaciones anteriores ({anteriores.length})</summary>
               <ul className="mt-3 grid gap-2">
                 {anteriores.map((o) => (
