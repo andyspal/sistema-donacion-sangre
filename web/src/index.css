@@ -27,6 +27,10 @@
   html {
     color-scheme: light;
     -webkit-tap-highlight-color: transparent;
+    /* Reserva siempre el lugar de la barra de desplazamiento: sin esto, al cambiar de pantalla
+       la barra aparece y desaparece (pantallas cortas y largas, y la animación de entrada)
+       y el contenido centrado salta a los costados. */
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-fondo text-texto font-sans antialiased;

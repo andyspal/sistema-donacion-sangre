@@ -130,6 +130,12 @@ export function monitorearStock(idCentro: number) {
     );
     if (u.disponibles < u.minimo_unidades && !activa) {
       generarAlerta(idCentro, u);
+    } else if (u.disponibles < u.minimo_unidades && activa) {
+      // El faltante sigue: se suma a quien haya quedado habilitado desde la última revisión.
+      const cv = uno<{ id_convocatoria: number }>(
+        `SELECT id_convocatoria FROM convocatoria WHERE id_alerta_stock = ? AND estado <> 'CERRADA'`, [activa.id_alerta_stock],
+      );
+      if (cv) convocarPendientes(idCentro, cv.id_convocatoria, u.grupo_abo, u.factor_rh);
     } else if (u.disponibles >= u.minimo_unidades && activa) {
       transaccion(() => {
         ejecutar(`UPDATE alerta_stock SET estado = 'ATENDIDA', atendida_en = ? WHERE id_alerta_stock = ?`, [ahoraIso(), activa.id_alerta_stock]);
@@ -168,20 +174,39 @@ const NOMBRE_COMPONENTE: Record<string, string> = {
 };
 
 function generarAlerta(idCentro: number, u: { id_umbral_stock: number; grupo_abo: string; factor_rh: string; disponibles: number }) {
-  const { idConvocatoria, destinatarios, centro } = transaccion(() => {
+  const idConvocatoria = transaccion(() => {
     const { id: idAlerta } = ejecutar(
       `INSERT INTO alerta_stock (id_umbral_stock, cantidad_detectada, estado, detectada_en) VALUES (?, ?, 'ACTIVA', ?)`,
       [u.id_umbral_stock, u.disponibles, ahoraIso()],
     );
-    const destinatarios = seleccionarCandidatos(idCentro, u.grupo_abo, u.factor_rh);
-    const { id: idConvocatoria } = ejecutar(
-      `INSERT INTO convocatoria (id_alerta_stock, id_centro, estado, creada_en) VALUES (?, ?, ?, ?)`,
-      [idAlerta, idCentro, destinatarios.length ? 'ABIERTA' : 'SIN_DESTINATARIOS', ahoraIso()],
+    const { id } = ejecutar(
+      `INSERT INTO convocatoria (id_alerta_stock, id_centro, estado, creada_en) VALUES (?, ?, 'SIN_DESTINATARIOS', ?)`,
+      [idAlerta, idCentro, ahoraIso()],
     );
-    auditar(null, 'GENERAR_CONVOCATORIA', 'convocatoria', idConvocatoria, { destinatarios: destinatarios.length });
-    const centro = uno<{ nombre: string }>('SELECT nombre FROM centro_hemoterapia WHERE id_centro = ?', [idCentro])!.nombre;
-    return { idConvocatoria, destinatarios, centro };
+    return id;
   });
+  const destinatarios = convocarPendientes(idCentro, idConvocatoria, u.grupo_abo, u.factor_rh);
+  auditar(null, 'GENERAR_CONVOCATORIA', 'convocatoria', idConvocatoria, { destinatarios });
+}
+
+/**
+ * Avisa a los candidatos que todavía no recibieron esta convocatoria: al crearla y en cada
+ * revisión mientras dure el faltante, así también llega a quien se registró o quedó
+ * habilitado después. Nadie recibe dos veces el mismo llamado. Devuelve cuántos sumó.
+ */
+function convocarPendientes(idCentro: number, idConvocatoria: number, grupo: string, rh: string): number {
+  const { destinatarios, centro } = transaccion(() => {
+    const avisados = new Set(todos<{ id_donante: number }>(
+      'SELECT id_donante FROM notificacion WHERE id_convocatoria = ?', [idConvocatoria],
+    ).map((n) => n.id_donante));
+    const destinatarios = seleccionarCandidatos(idCentro, grupo, rh).filter((c) => !avisados.has(c.id_donante));
+    if (destinatarios.length) {
+      ejecutar(`UPDATE convocatoria SET estado = 'ABIERTA' WHERE id_convocatoria = ? AND estado = 'SIN_DESTINATARIOS'`, [idConvocatoria]);
+    }
+    const centro = uno<{ nombre: string }>('SELECT nombre FROM centro_hemoterapia WHERE id_centro = ?', [idCentro])!.nombre;
+    return { destinatarios, centro };
+  });
+  if (!destinatarios.length) return 0;
 
   // RF23 — un aviso por destinatario, sin información sensible (RNF03): queda en la bandeja
   // de avisos de la PWA y además se envía por correo, de a uno para no saturar el servidor SMTP.
@@ -197,6 +222,7 @@ function generarAlerta(idCentro: number, u: { id_umbral_stock: number; grupo_abo
   void (async () => {
     for (const a of avisos) await entregar(a.id, a.destino);
   })().catch((error) => console.error('Convocatoria:', (error as Error).message));
+  return destinatarios.length;
 }
 
 export function listarConvocatorias(idCentro: number) {

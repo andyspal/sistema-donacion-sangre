@@ -7,7 +7,8 @@ import path from 'node:path';
 // Base de datos y clave en un directorio temporal; sin SMTP real.
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'hemored-test-'));
 delete process.env.SMTP_HOST;
-const { ejecutar } = await import('../src/db.ts');
+const { ejecutar, uno } = await import('../src/db.ts');
+const { monitorearStock } = await import('../src/services/inventario.ts');
 const { registrarConsentimiento } = await import('../src/services/donantes.ts');
 const estudios = await import('../src/services/procesadorEstudios.ts');
 const { generarEstudioEjemplo } = await import('../src/estudioEjemplo.ts');
@@ -104,6 +105,33 @@ test('Recordatorio de turno: solo dentro de la anticipación elegida y si se res
 
   ejecutar('UPDATE donante SET recordatorio_horas = 0 WHERE id_donante = ?', [donante]);
   assert.equal(turnosPorRecordar(ahora).length, 0);
+});
+
+test('Una convocatoria sin destinatarios suma a quien queda habilitado después, una sola vez', () => {
+  const idCentro = ejecutar(`INSERT INTO centro_hemoterapia (nombre, domicilio, localidad) VALUES ('Centro B', 'Calle 2', 'Córdoba')`).id;
+  ejecutar(`INSERT INTO umbral_stock (id_centro, componente, grupo_abo, factor_rh, minimo_unidades, activo) VALUES (?, 'GLOBULOS_ROJOS', 'B', '-', 3, 1)`, [idCentro]);
+  ejecutar(`INSERT INTO existencia_hemocomponente (id_centro, componente, grupo_abo, factor_rh, fecha_vencimiento, cantidad_unidades, actualizada_en)
+            VALUES (?, 'GLOBULOS_ROJOS', 'B', '-', ?, 1, ?)`, [idCentro, sumarDias(hoy, 20), ahoraIso()]);
+  const convocatoria = () => uno<{ id_convocatoria: number; estado: string }>('SELECT id_convocatoria, estado FROM convocatoria WHERE id_centro = ?', [idCentro])!;
+  const avisos = () => uno<{ n: number }>('SELECT COUNT(*) AS n FROM notificacion WHERE id_convocatoria = ?', [convocatoria().id_convocatoria])!.n;
+
+  monitorearStock(idCentro);
+  assert.equal(convocatoria().estado, 'SIN_DESTINATARIOS');
+
+  // Se registra un donante B− habilitado mientras dura el faltante.
+  const nuevo = crearDonante();
+  ejecutar(`UPDATE donante SET grupo_abo = 'B', factor_rh = '-' WHERE id_donante = ?`, [nuevo]);
+  registrarConsentimiento(nuevo, 'CONVOCATORIAS', true);
+  const idCuestionario = ejecutar(`INSERT INTO cuestionario_salud (id_donante, version, respuestas_cifradas, declarado_en) VALUES (?, 'x', 'x', ?)`, [nuevo, ahoraIso()]).id;
+  ejecutar(`INSERT INTO orientacion (id_donante, id_cuestionario, resultado, motor_version, detalle_cifrado, generada_en) VALUES (?, ?, 'FAVORABLE', 'x', 'x', ?)`,
+    [nuevo, idCuestionario, ahoraIso()]);
+
+  monitorearStock(idCentro);
+  assert.equal(convocatoria().estado, 'ABIERTA');
+  assert.equal(avisos(), 1);
+
+  monitorearStock(idCentro);
+  assert.equal(avisos(), 1); // no se repite el aviso
 });
 
 test('Plantilla de correo: escapa el contenido y lleva el enlace', () => {
