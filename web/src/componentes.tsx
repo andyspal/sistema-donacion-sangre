@@ -268,7 +268,7 @@ export function CargaEstudio({ onCargado }: { onCargado?: (e: Estudio) => void }
       )}
       <p className="flex gap-2 text-xs text-tenue">
         <Icono nombre="candado" className="size-4" />
-        Los archivos se guardan cifrados. Interpretamos los PDF con texto; las fotos las revisa el personal del centro. Los análisis vencidos no se procesan.
+        Los archivos se guardan cifrados. Interpretamos los PDF con texto; las fotos las revisa el personal del centro. Los análisis de más de 6 meses no se procesan.
       </p>
     </div>
   );
