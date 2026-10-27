@@ -3,7 +3,7 @@ import { auditar } from '../auditoria.ts';
 import { URL_PUBLICA } from '../config.ts';
 import { ErrorHttp, ahoraIso, fechaHoraLocal, fechaLocal, sumarDias } from '../util.ts';
 import { obtenerDonante } from './donantes.ts';
-import { verificarIntervalosDonante } from './intervalos.ts';
+import { habilitacionParaTurnos } from './habilitacion.ts';
 import { avisarEnSegundoPlano } from './mensajeria.ts';
 
 /** Estados de turno que ocupan cupo. */
@@ -99,12 +99,12 @@ export function reservarTurno(idUsuario: number, idDonante: number, idAgenda: nu
         `Ya tenés un turno reservado para el ${formato(activo.inicio)}. Cancelalo si querés elegir otro.`);
     }
 
-    // RF07: no se agenda antes de que se cumpla el intervalo entre donaciones.
-    const intervalo = verificarIntervalosDonante(idDonante, donante.sexo_biologico, franja.inicio.slice(0, 10));
-    if (!intervalo.cumplido) {
-      throw new ErrorHttp(422, 'INTERVALO_NO_CUMPLIDO',
-        `Por el intervalo entre donaciones podés reservar a partir del ${intervalo.fechaHabilitacion.split('-').reverse().join('/')}.`,
-        { fechaHabilitacion: intervalo.fechaHabilitacion });
+    // No se agenda sin una orientación al día ni antes de que venzan el intervalo (RF07) y los diferimientos.
+    const habilitacion = habilitacionParaTurnos(idDonante, donante.sexo_biologico);
+    if (habilitacion.bloqueo) throw new ErrorHttp(422, habilitacion.bloqueo.codigo, habilitacion.bloqueo.mensaje);
+    if (franja.inicio.slice(0, 10) < habilitacion.desde) {
+      throw new ErrorHttp(422, 'NO_HABILITADO', `Podés reservar a partir del ${habilitacion.desde.split('-').reverse().join('/')}. ${habilitacion.motivo}`,
+        { fechaHabilitacion: habilitacion.desde });
     }
 
     // Verificación del cupo dentro de la transacción (bloqueo de escritura tomado por BEGIN IMMEDIATE).

@@ -87,11 +87,17 @@ export interface Turno {
   centro: { id: number; nombre: string; domicilio: string; localidad: string };
 }
 
+/** Desde cuándo puede reservar: intervalo, diferimientos de la orientación y de la evaluación presencial. */
+export interface Habilitacion {
+  desde: string; motivo: string | null;
+  bloqueo: { codigo: 'SIN_ORIENTACION' | 'ORIENTACION_DESACTUALIZADA' | 'DIFERIDO_SIN_FECHA'; mensaje: string } | null;
+}
+
 export interface Resumen {
   nombre: string; grupo: string | null; consentimientos: Consentimientos;
   cuestionario: { declaradoEn: string; vigente: boolean } | null;
   estudios: { total: number; requierenRevision: number; detenidos: number; vigentes: number };
-  orientacion: Orientacion | null; intervalo: Intervalo; turno: Turno | null;
+  orientacion: Orientacion | null; intervalo: Intervalo; habilitacion: Habilitacion; turno: Turno | null;
   donaciones: number; avisosSinLeer: number;
 }
 

@@ -13,6 +13,7 @@ import {
 } from '../services/procesadorEstudios.ts';
 import { generarOrientacion, listarOrientaciones, ultimaOrientacion } from '../services/orientacion.ts';
 import { verificarIntervalosDonante } from '../services/intervalos.ts';
+import { habilitacionParaTurnos } from '../services/habilitacion.ts';
 import { cancelarTurno, consultarDisponibilidad, listarCentros, misTurnos, reservarTurno, turnoActivo } from '../services/turnos.ts';
 import { PROCEDIMIENTO, donacionesDelDonante, registrarAutoexclusion } from '../services/autoexclusion.ts';
 
@@ -99,6 +100,7 @@ rutasDonante.get('/donante/resumen', (req, res) => {
     },
     orientacion: ultimaOrientacion(id) ?? null,
     intervalo: verificarIntervalosDonante(id, d.sexo_biologico),
+    habilitacion: habilitacionParaTurnos(id, d.sexo_biologico),
     turno: turnoActivo(id),
     donaciones: donacionesDelDonante(id).length,
     avisosSinLeer: uno<{ n: number }>('SELECT COUNT(*) AS n FROM notificacion WHERE id_donante = ? AND leida_en IS NULL', [id])!.n,
@@ -192,7 +194,7 @@ rutasDonante.get('/centros', (_req, res) => {
 rutasDonante.get('/centros/:id/disponibilidad', (req, res) => {
   const d = donante(req);
   res.json({
-    fechaHabilitacion: verificarIntervalosDonante(d.id_donante, d.sexo_biologico).fechaHabilitacion,
+    fechaHabilitacion: habilitacionParaTurnos(d.id_donante, d.sexo_biologico).desde,
     dias: consultarDisponibilidad(idParam(req.params.id)),
   });
 });

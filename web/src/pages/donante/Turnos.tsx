@@ -41,6 +41,8 @@ export function Turnos() {
   const centro = centros?.find((c) => c.id === idCentro);
   const diaSel = disp?.dias.find((d) => d.fecha === dia);
   const orientacion = resumen?.orientacion;
+  const bloqueo = resumen?.habilitacion.bloqueo ?? null;
+  const sinCuestionario = bloqueo?.codigo === 'SIN_ORIENTACION' && !resumen?.cuestionario;
 
   const reservar = async () => {
     if (!horario) return;
@@ -108,48 +110,52 @@ export function Turnos() {
         </Tarjeta>
       ) : (
         <div className="grid grid-cols-1 gap-5">
-          {orientacion && orientacion.resultado !== 'FAVORABLE' && (
-            <Alerta tono={orientacion.resultado === 'REVISION_MEDICA' ? 'cielo' : 'ambar'} titulo={`Tu última orientación: ${ETIQUETA_RESULTADO[orientacion.resultado].toLowerCase()}`}>
-              {orientacion.resultado === 'REVISION_MEDICA'
-                ? 'Podés reservar igual: el profesional va a evaluar tu caso en la entrevista.'
-                : orientacion.fechaHabilitacionEstimada
-                  ? `Te recomendamos elegir un día a partir del ${fecha(orientacion.fechaHabilitacionEstimada)} para evitar un diferimiento en el centro.`
-                  : 'Te recomendamos esperar a resolver lo indicado antes de reservar.'}{' '}
+          {bloqueo ? (
+            <Alerta tono="ambar" titulo={bloqueo.codigo === 'DIFERIDO_SIN_FECHA' ? 'Por ahora no podés reservar' : 'Antes de reservar'}>
+              {bloqueo.mensaje}
+              <Link to={sinCuestionario ? '/app/cuestionario' : '/app/orientacion'}
+                className="mt-2 flex w-fit items-center gap-1 font-medium text-primario hover:underline">
+                {sinCuestionario ? 'Completar el cuestionario' : bloqueo.codigo === 'DIFERIDO_SIN_FECHA' ? 'Ver mi orientación' : 'Pedir mi orientación'}
+                <Icono nombre="flecha" className="size-3.5" />
+              </Link>
+            </Alerta>
+          ) : resumen?.habilitacion.motivo ? (
+            <Alerta tono="ambar" titulo={`Podés reservar desde el ${fecha(resumen.habilitacion.desde)}`}>
+              {resumen.habilitacion.motivo}{' '}
+              {orientacion?.resultado === 'DIFERIMIENTO_TEMPORAL' && <Link to="/app/orientacion" className="text-primario hover:underline">Ver detalle</Link>}
+            </Alerta>
+          ) : orientacion?.resultado === 'REVISION_MEDICA' && (
+            <Alerta tono="cielo" titulo={`Tu última orientación: ${ETIQUETA_RESULTADO[orientacion.resultado].toLowerCase()}`}>
+              Podés reservar: el profesional va a evaluar tu caso en la entrevista.{' '}
               <Link to="/app/orientacion" className="text-primario hover:underline">Ver detalle</Link>
             </Alerta>
           )}
-          {!orientacion && (
-            <Alerta tono="cielo" titulo="¿Ya pediste tu orientación previa?">
-              Te ayuda a evitar viajes en vano. <Link to="/app/orientacion" className="text-primario hover:underline">Pedirla ahora</Link>
-            </Alerta>
+
+          {!bloqueo && (
+            <section aria-labelledby="paso-centro">
+              <h2 id="paso-centro" className="mb-2 text-sm font-medium text-tenue">1 · Centro</h2>
+              {!centros ? <Cargando /> : (
+                <div className="grid gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Centro de hemoterapia">
+                  {centros.map((c) => (
+                    <button key={c.id} role="radio" aria-checked={idCentro === c.id} onClick={() => { setIdCentro(c.id); setError(''); }}
+                      className={cx('rounded-xl border p-4 text-left transition cursor-pointer',
+                        idCentro === c.id ? 'border-primario/60 bg-primario-suave' : 'border-borde bg-superficie hover:border-tenue/50')}>
+                      <span className="block font-medium leading-snug">{c.nombre}</span>
+                      <span className="mt-1 block text-sm text-tenue">{c.domicilio} · {c.localidad}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
           )}
 
-          <section aria-labelledby="paso-centro">
-            <h2 id="paso-centro" className="mb-2 text-sm font-medium text-tenue">1 · Centro</h2>
-            {!centros ? <Cargando /> : (
-              <div className="grid gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Centro de hemoterapia">
-                {centros.map((c) => (
-                  <button key={c.id} role="radio" aria-checked={idCentro === c.id} onClick={() => { setIdCentro(c.id); setError(''); }}
-                    className={cx('rounded-xl border p-4 text-left transition cursor-pointer',
-                      idCentro === c.id ? 'border-primario/60 bg-primario-suave' : 'border-borde bg-superficie hover:border-tenue/50')}>
-                    <span className="block font-medium leading-snug">{c.nombre}</span>
-                    <span className="mt-1 block text-sm text-tenue">{c.domicilio} · {c.localidad}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {idCentro && (
+          {idCentro && !bloqueo && (
             <section aria-labelledby="paso-dia">
               <h2 id="paso-dia" className="mb-2 text-sm font-medium text-tenue">2 · Día</h2>
               {cargandoDisp && !disp ? <Cargando /> : !disp?.dias.some((d) => d.libres > 0) ? (
                 <Vacio icono="calendario" titulo="No hay cupos disponibles">Probá con otro centro o volvé a consultar en unos días.</Vacio>
               ) : (
                 <>
-                  {disp.fechaHabilitacion > disp.dias[0].fecha && (
-                    <p className="mb-2 text-sm text-ambar">Por el intervalo entre donaciones podés reservar desde el {fecha(disp.fechaHabilitacion)}.</p>
-                  )}
                   <div className="-mx-4 flex gap-2 overflow-x-auto scroll-oculto px-4 pb-1">
                     {disp.dias.map((d) => {
                       const bloqueado = d.libres === 0 || d.fecha < disp.fechaHabilitacion;
@@ -172,7 +178,7 @@ export function Turnos() {
             </section>
           )}
 
-          {diaSel && (
+          {diaSel && !bloqueo && (
             <section aria-labelledby="paso-hora">
               <h2 id="paso-hora" className="mb-2 text-sm font-medium text-tenue">3 · Horario · {fechaLarga(diaSel.fecha)}</h2>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -191,7 +197,7 @@ export function Turnos() {
 
           {error && <Alerta tono="sangre">{error}</Alerta>}
 
-          {horario && centro && diaSel && (
+          {horario && centro && diaSel && !bloqueo && (
             <div className="sticky bottom-20 md:bottom-4 z-10 aparecer">
               <div className="flex flex-col gap-3 rounded-xl border border-primario/40 bg-superficie/95 p-4 shadow-2xl sm:flex-row sm:items-center sm:justify-between">
                 <div>
