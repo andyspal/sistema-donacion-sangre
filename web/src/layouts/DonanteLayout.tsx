@@ -58,7 +58,7 @@ export function DonanteLayout() {
       {/* Escritorio: barra lateral de íconos que se expande al pasar el mouse (o al enfocarla con teclado) */}
       <div className="hidden md:block">
         <aside className="group fixed inset-y-0 left-0 z-30 flex w-16 flex-col overflow-hidden border-r border-borde bg-fondo p-3 transition-[width] duration-200 hover:w-60 focus-within:w-60">
-          <NavLink to="/app" className="flex h-10 items-center pl-3 text-transparent transition-colors group-hover:text-texto group-focus-within:text-texto"><Marca /></NavLink>
+          <NavLink to="/app" className="flex h-10 items-center pl-2 text-transparent transition-colors group-hover:text-texto group-focus-within:text-texto"><Marca /></NavLink>
           <nav className="mt-4 flex flex-col gap-1" aria-label="Principal">
             {NAV.map((n) => (
               <NavLink key={n.a} to={n.a} end={n.fin} className={enlace} title={n.texto}>
@@ -80,10 +80,11 @@ export function DonanteLayout() {
               <span className={visible}>Avisos{sinLeer > 0 && ` (${sinLeer})`}</span>
             </NavLink>
           </nav>
-          <div className="mt-auto flex items-center justify-between rounded-lg bg-superficie">
-            <p className={cx('min-w-0 truncate pl-3 text-sm', visible)}>Hola, {usuario?.nombre.split(' ')[0]}</p>
-            <button onClick={cerrar} className="grid size-10 shrink-0 place-items-center rounded-lg text-tenue hover:text-texto hover:bg-superficie-2 cursor-pointer" aria-label="Cerrar sesión" title="Cerrar sesión">
-              <Icono nombre="salir" />
+          {/* Mismo formato que los ítems del menú: el ícono queda en la misma columna. */}
+          <div className="mt-auto flex flex-col rounded-lg bg-superficie">
+            <p className="hidden truncate px-3 pt-2 text-sm group-hover:block group-focus-within:block">Hola, {usuario?.nombre.split(' ')[0]}</p>
+            <button onClick={cerrar} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-tenue transition hover:text-texto hover:bg-superficie-2 cursor-pointer" aria-label="Cerrar sesión" title="Cerrar sesión">
+              <Icono nombre="salir" className="size-4" /><span className={visible}>Cerrar sesión</span>
             </button>
           </div>
         </aside>
