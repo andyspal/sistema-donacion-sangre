@@ -80,6 +80,7 @@ export interface Orientacion {
 }
 
 export type Consentimientos = Record<'DATOS_SALUD' | 'CONVOCATORIAS', { otorgado: boolean; fecha: string | null }>;
+export interface Preferencias { correoTurnos: boolean; recordatorioHoras: 0 | 24 | 48 }
 
 export interface Turno {
   id: number; estado: string; inicio: string; fin: string; reservadoEn: string;
@@ -89,7 +90,7 @@ export interface Turno {
 export interface Resumen {
   nombre: string; grupo: string | null; consentimientos: Consentimientos;
   cuestionario: { declaradoEn: string; vigente: boolean } | null;
-  estudios: { total: number; requierenRevision: number };
+  estudios: { total: number; requierenRevision: number; detenidos: number; vigentes: number };
   orientacion: Orientacion | null; intervalo: Intervalo; turno: Turno | null;
   donaciones: number; avisosSinLeer: number;
 }
@@ -97,10 +98,13 @@ export interface Resumen {
 export interface ParametrosClinicos {
   hemoglobina?: number; hematocrito?: number; plaquetas?: number; serologias?: Record<string, 'REACTIVO' | 'NO_REACTIVO'>;
 }
+export type MotivoDetencion = 'VENCIDO' | 'FECHA_FUTURA' | 'DNI_NO_COINCIDE';
 export interface Estudio {
   id: number; nombreArchivo: string; tipoMime: string; fechaEstudio: string | null;
-  estado: 'PENDIENTE' | 'PROCESADO' | 'REQUIERE_REVISION'; observacion: string | null;
-  parametros: ParametrosClinicos | null; vigente: boolean; cargadoEn: string;
+  estado: 'PENDIENTE' | 'PROCESADO' | 'REQUIERE_REVISION' | 'DETENIDO'; observacion: string | null;
+  parametros: ParametrosClinicos | null; vigente: boolean; venceEl: string | null; cargadoEn: string;
+  /** TEXTO: lector del texto del PDF · NINGUNO: no se leyó. */
+  metodo: 'TEXTO' | 'NINGUNO' | null; motivoDetencion: MotivoDetencion | null;
 }
 
 export interface Pregunta {

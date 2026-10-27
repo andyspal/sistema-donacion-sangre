@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { api, ApiError, useCarga, type Consentimientos, type DefinicionCuestionario, type Estudio, type Intervalo, type Orientacion } from '../../api';
-import { Parametros, ResultadoOrientacion } from '../../componentes';
+import { ResultadoOrientacion, TarjetaEstudio, estudioVencido } from '../../componentes';
 import { ETIQUETA_RESULTADO, TONO_RESULTADO, fecha, fechaHora, hoy, instante } from '../../formato';
 import { useSesion } from '../../sesion';
 import { Alerta, Boton, Campo, Cargando, Encabezado, Entrada, Icono, Insignia, Segmentado, Selector, Tarjeta } from '../../ui';
@@ -202,17 +202,14 @@ export function Legajo() {
 
         {l.estudios && l.estudios.length > 0 && (
           <Tarjeta>
-            <h2 className="font-medium">Estudios adjuntos</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-medium">Estudios adjuntos</h2>
+              {l.estudios.some(estudioVencido) && <Insignia tono="sangre"><Icono nombre="alerta" className="size-3.5" />Hay informes vencidos</Insignia>}
+            </div>
             <ul className="mt-3 grid gap-3">
               {l.estudios.map((e) => (
-                <li key={e.id} className="grid gap-2 rounded-lg border border-borde p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <a href={`/api/hospital/postulantes/${p.id}/estudios/${e.id}/archivo`} target="_blank" rel="noreferrer" className="font-medium hover:text-primario break-all">{e.nombreArchivo}</a>
-                    <Insignia tono={e.estado === 'PROCESADO' ? 'lima' : 'ambar'}>{e.estado === 'PROCESADO' ? 'Interpretado' : 'Requiere revisión'}</Insignia>
-                  </div>
-                  <p className="text-xs text-tenue">Fecha del estudio: {fecha(e.fechaEstudio)}</p>
-                  {e.parametros && <Parametros p={e.parametros} />}
-                  {e.observacion && <p className="text-sm text-ambar">{e.observacion}</p>}
+                <li key={e.id} className="rounded-lg border border-borde p-3">
+                  <TarjetaEstudio e={e} profesional enlace={`/api/hospital/postulantes/${p.id}/estudios/${e.id}/archivo`} />
                 </li>
               ))}
             </ul>

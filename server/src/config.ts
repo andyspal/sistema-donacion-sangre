@@ -35,3 +35,17 @@ function cargarClave(): Buffer {
 }
 
 export const CLAVE_DATOS = cargarClave();
+
+/**
+ * Correo saliente (avisos de turnos y convocatorias). Con SMTP_HOST se envía por ese
+ * servidor; sin él (desarrollo) cada mensaje se guarda como .eml en data/correos.
+ */
+export const SMTP = {
+  host: process.env.SMTP_HOST || undefined,
+  puerto: Number(process.env.SMTP_PORT ?? 587),
+  seguro: process.env.SMTP_SECURE === 'true',
+  usuario: process.env.SMTP_USER || undefined,
+  contrasena: process.env.SMTP_PASS || undefined,
+  remitente: process.env.CORREO_REMITENTE || 'HemoRed <no-responder@hemored.test>',
+};
+export const DIR_CORREOS = path.join(DIR_DATOS, 'correos');

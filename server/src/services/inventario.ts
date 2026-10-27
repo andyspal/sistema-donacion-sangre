@@ -4,7 +4,7 @@ import type { UsuarioSesion } from '../auth.ts';
 import { URL_PUBLICA } from '../config.ts';
 import { ErrorHttp, ahoraIso, esFecha, fechaLocal, normalizar } from '../util.ts';
 import { verificarIntervalosDonante } from './intervalos.ts';
-import { enviarAviso, reintentarAviso } from './mensajeria.ts';
+import { entregar, registrarAviso, reintentarAviso } from './mensajeria.ts';
 
 export const COMPONENTES = ['GLOBULOS_ROJOS', 'PLAQUETAS', 'PLASMA'] as const;
 export const GRUPOS = ['O', 'A', 'B', 'AB'] as const;
@@ -183,15 +183,20 @@ function generarAlerta(idCentro: number, u: { id_umbral_stock: number; grupo_abo
     return { idConvocatoria, destinatarios, centro };
   });
 
-  // RF23 — un aviso por destinatario, sin información sensible (RNF03).
-  for (const d of destinatarios) {
-    enviarAviso({
+  // RF23 — un aviso por destinatario, sin información sensible (RNF03): queda en la bandeja
+  // de avisos de la PWA y además se envía por correo, de a uno para no saturar el servidor SMTP.
+  const avisos = destinatarios.map((d) => ({
+    destino: d.email!,
+    id: registrarAviso({
       idDonante: d.id_donante, idConvocatoria, tipo: 'CONVOCATORIA', canal: 'EMAIL', destino: d.email!,
       asunto: `${centro} necesita donantes`,
       cuerpo: `Hola ${d.nombres}: ${centro} necesita donantes como vos esta semana. Si podés ayudar, reservá tu turno desde el enlace.`,
       enlace: `${URL_PUBLICA}/app/turnos?centro=${idCentro}&convocatoria=${idConvocatoria}`,
-    });
-  }
+    }),
+  }));
+  void (async () => {
+    for (const a of avisos) await entregar(a.id, a.destino);
+  })().catch((error) => console.error('Convocatoria:', (error as Error).message));
 }
 
 export function listarConvocatorias(idCentro: number) {
@@ -223,7 +228,7 @@ export function listarConvocatorias(idCentro: number) {
 }
 
 /** Reintenta los envíos fallidos de una convocatoria (flujo alternativo de CU05). */
-export function reintentarEnvios(usuario: UsuarioSesion & { idCentro: number }, idConvocatoria: number) {
+export async function reintentarEnvios(usuario: UsuarioSesion & { idCentro: number }, idConvocatoria: number) {
   const cv = uno<{ id_centro: number }>('SELECT id_centro FROM convocatoria WHERE id_convocatoria = ?', [idConvocatoria]);
   if (!cv || cv.id_centro !== usuario.idCentro) throw new ErrorHttp(404, 'NO_ENCONTRADO', 'La convocatoria no existe.');
   const fallidos = todos<{ id_notificacion: number; email: string }>(
@@ -233,7 +238,7 @@ export function reintentarEnvios(usuario: UsuarioSesion & { idCentro: number }, 
   );
   let enviados = 0;
   for (const f of fallidos) {
-    if (reintentarAviso(f.id_notificacion, f.email) === 'ENVIADO') enviados++;
+    if (await reintentarAviso(f.id_notificacion, f.email) === 'ENVIADO') enviados++;
   }
   auditar(usuario.idUsuario, 'REINTENTAR_ENVIOS', 'convocatoria', idConvocatoria, { enviados, total: fallidos.length });
   return { reintentados: fallidos.length, enviados };

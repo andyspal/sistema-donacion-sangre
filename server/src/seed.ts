@@ -8,18 +8,22 @@
  *   Donantes (contraseña Donante2026):
  *     lucia@hemored.test        — O-, orientación favorable, 2 donaciones previas
  *     martin@hemored.test       — A+, donó hace 30 días (intervalo no cumplido)
+ *   Lucía tiene cargado un análisis de hace 8 meses: queda «Análisis detenido — vencido»
+ *   (sirve para ver la leyenda en su panel y en el legajo del médico). En data/ quedan dos
+ *   PDF ficticios para probar la carga: uno vigente y uno vencido.
  *
  * Uso: `npm run seed` reinicia la base y vuelve a sembrar.
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { DIR_DATOS, DIR_ESTUDIOS } from './config.ts';
-import { db, ejecutar, transaccion } from './db.ts';
+import { DIR_CORREOS, DIR_DATOS, DIR_ESTUDIOS } from './config.ts';
+import { ESQUEMA, db, ejecutar, transaccion } from './db.ts';
 import { hashContrasena } from './seguridad.ts';
 import { ahoraIso, fechaLocal, sumarDias } from './util.ts';
 import { registrarConsentimiento } from './services/donantes.ts';
 import { guardarCuestionario } from './services/cuestionario.ts';
 import { generarOrientacion } from './services/orientacion.ts';
+import { guardarEstudio, procesarEstudio } from './services/procesadorEstudios.ts';
 import { generarEstudioEjemplo } from './estudioEjemplo.ts';
 
 const CONTRASENA_PERSONAL = 'Hemored2026';
@@ -154,12 +158,18 @@ export async function sembrar() {
     return { donantes };
   });
 
-  // Orientaciones iniciales (usa el mismo motor de reglas que la PWA).
-  for (const d of ids.donantes) await generarOrientacion(d.id);
-
+  // Estudios de ejemplo (ficticios): uno vigente para cargar desde la PWA y uno vencido.
   generarEstudioEjemplo(path.join(DIR_DATOS, 'estudio-ejemplo-lucia.pdf'), {
     paciente: 'FERNANDEZ LUCIA', dni: '30111222', fecha: sumarDias(hoy, -12),
   });
+  const vencido = path.join(DIR_DATOS, 'estudio-ejemplo-vencido.pdf');
+  generarEstudioEjemplo(vencido, { paciente: 'FERNANDEZ LUCIA', dni: '30111222', fecha: sumarDias(hoy, -240) });
+  const idVencido = guardarEstudio(ids.donantes[0].id,
+    { originalname: 'analisis-marzo.pdf', mimetype: 'application/pdf', buffer: fs.readFileSync(vencido) });
+  await procesarEstudio(idVencido);
+
+  // Orientaciones iniciales (usa el mismo motor de reglas que la PWA).
+  for (const d of ids.donantes) await generarOrientacion(d.id);
   console.log('Datos de demostración sembrados.');
 }
 
@@ -169,10 +179,11 @@ function reiniciar() {
   db.exec('PRAGMA foreign_keys = OFF');
   for (const t of tablas) db.exec(`DROP TABLE IF EXISTS ${t}`);
   db.exec('PRAGMA foreign_keys = ON');
-  db.exec(fs.readFileSync(path.join(import.meta.dirname, 'schema.sql'), 'utf8'));
+  db.exec(ESQUEMA);
   fs.rmSync(DIR_ESTUDIOS, { recursive: true, force: true });
   fs.mkdirSync(DIR_ESTUDIOS, { recursive: true });
   fs.rmSync(path.join(DIR_DATOS, 'bandeja-salida.log'), { force: true });
+  fs.rmSync(DIR_CORREOS, { recursive: true, force: true });
 }
 
 if (import.meta.main && process.argv.includes('--reset')) {

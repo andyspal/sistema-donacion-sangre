@@ -10,6 +10,7 @@ import { Registro } from './pages/publico/Registro';
 import { DonanteLayout } from './layouts/DonanteLayout';
 import { Tablero } from './pages/donante/Tablero';
 import { Cuestionario } from './pages/donante/Cuestionario';
+import { SugerenciaEstudio } from './pages/donante/SugerenciaEstudio';
 import { Estudios } from './pages/donante/Estudios';
 import { Orientacion } from './pages/donante/Orientacion';
 import { Turnos } from './pages/donante/Turnos';
@@ -37,6 +38,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/app" element={<Protegida para="DONANTE"><DonanteLayout /></Protegida>}>
             <Route index element={<Tablero />} />
             <Route path="cuestionario" element={<Cuestionario />} />
+            <Route path="cuestionario/estudio" element={<SugerenciaEstudio />} />
             <Route path="estudios" element={<Estudios />} />
             <Route path="orientacion" element={<Orientacion />} />
             <Route path="turnos" element={<Turnos />} />

@@ -23,10 +23,11 @@ function pasos(r: Resumen): Paso[] {
     },
     {
       titulo: 'Estudios médicos',
-      detalle: r.estudios.total
-        ? `${r.estudios.total} cargado${r.estudios.total > 1 ? 's' : ''}${r.estudios.requierenRevision ? ` · ${r.estudios.requierenRevision} en revisión` : ''}.`
-        : 'Opcional: un análisis reciente mejora la orientación.',
-      estado: r.estudios.total ? 'hecho' : 'opcional', a: '/app/estudios', accion: r.estudios.total ? 'Ver' : 'Adjuntar',
+      detalle: !r.estudios.total ? 'Opcional: un análisis reciente mejora la orientación.'
+        : !r.estudios.vigentes ? 'Ninguno vigente para la orientación: subí un análisis reciente.'
+        : `${r.estudios.vigentes} vigente${r.estudios.vigentes > 1 ? 's' : ''}${r.estudios.requierenRevision ? ` · ${r.estudios.requierenRevision} en revisión` : ''}.`,
+      estado: r.estudios.vigentes ? 'hecho' : 'opcional',
+      a: '/app/estudios', accion: r.estudios.total ? 'Ver' : 'Adjuntar',
     },
     {
       titulo: 'Orientación previa',
@@ -47,7 +48,7 @@ function pasos(r: Resumen): Paso[] {
 const MARCA: Record<Estado, string> = {
   hecho: 'bg-verde text-white',
   pendiente: 'border border-tenue/50 text-tenue',
-  atencion: 'bg-ambar text-fondo',
+  atencion: 'bg-ambar text-white',
   opcional: 'border border-dashed border-tenue/50 text-tenue',
 };
 

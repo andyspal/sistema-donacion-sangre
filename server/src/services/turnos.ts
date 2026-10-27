@@ -4,7 +4,7 @@ import { URL_PUBLICA } from '../config.ts';
 import { ErrorHttp, ahoraIso, fechaHoraLocal, fechaLocal, sumarDias } from '../util.ts';
 import { obtenerDonante } from './donantes.ts';
 import { verificarIntervalosDonante } from './intervalos.ts';
-import { enviarAviso } from './mensajeria.ts';
+import { avisarEnSegundoPlano } from './mensajeria.ts';
 
 /** Estados de turno que ocupan cupo. */
 const OCUPAN_CUPO = `('RESERVADO','ASISTIO')`;
@@ -80,7 +80,7 @@ export function turnoActivo(idDonante: number) {
   return t ? vistaTurno(t) : null;
 }
 
-const formato = (inicio: string) => `${inicio.slice(8, 10)}/${inicio.slice(5, 7)} a las ${inicio.slice(11, 16)} h`;
+export const formato = (inicio: string) => `${inicio.slice(8, 10)}/${inicio.slice(5, 7)} a las ${inicio.slice(11, 16)} h`;
 
 /** CU02 — Reservar turno (RF12) con verificación del cupo dentro de una transacción (RNF08). */
 export function reservarTurno(idUsuario: number, idDonante: number, idAgenda: number, idConvocatoria?: number) {
@@ -127,17 +127,19 @@ export function reservarTurno(idUsuario: number, idDonante: number, idAgenda: nu
   });
 
   // Confirmación asincrónica por el servicio de mensajería, sin datos clínicos (RNF03).
+  // Si el donante desactivó los correos de turnos, el aviso queda solo en la PWA.
   const email = uno<{ email: string }>('SELECT email FROM usuario WHERE id_usuario = ?', [idUsuario])!.email;
-  setImmediate(() => enviarAviso({
+  avisarEnSegundoPlano({
     idDonante,
+    idTurno: turno.id_turno,
     tipo: 'CONFIRMACION_TURNO',
-    canal: 'EMAIL',
+    canal: donante.correo_turnos ? 'EMAIL' : 'APP',
     destino: email,
     asunto: 'Tu turno para donar sangre está confirmado',
     cuerpo: `Te esperamos en ${turno.centro} (${turno.domicilio}, ${turno.localidad}) el ${formato(turno.inicio)}. ` +
       'Recordá llevar tu DNI, desayunar liviano e hidratarte bien.',
     enlace: `${URL_PUBLICA}/app/turnos`,
-  }));
+  });
 
   return vistaTurno(turno);
 }
@@ -154,10 +156,10 @@ export function cancelarTurno(idUsuario: number, idDonante: number, idTurno: num
     return t;
   });
   const email = uno<{ email: string }>('SELECT email FROM usuario WHERE id_usuario = ?', [idUsuario])!.email;
-  setImmediate(() => enviarAviso({
-    idDonante, tipo: 'CANCELACION_TURNO', canal: 'EMAIL', destino: email,
+  avisarEnSegundoPlano({
+    idDonante, idTurno, tipo: 'CANCELACION_TURNO', canal: obtenerDonante(idDonante)!.correo_turnos ? 'EMAIL' : 'APP', destino: email,
     asunto: 'Cancelaste tu turno',
     cuerpo: `Se canceló tu turno del ${formato(turno.inicio)} en ${turno.centro}. Podés reservar otro cuando quieras.`,
     enlace: `${URL_PUBLICA}/app/turnos`,
-  }));
+  });
 }

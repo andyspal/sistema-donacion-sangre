@@ -10,6 +10,8 @@ import { rutasAuth } from './routes/auth.ts';
 import { rutasDonante } from './routes/donante.ts';
 import { rutasHospital } from './routes/hospital.ts';
 import { monitorearStock } from './services/inventario.ts';
+import { enviarRecordatorios } from './services/recordatorios.ts';
+import { modoCorreo } from './services/correo.ts';
 import { sembrar } from './seed.ts';
 
 if (!uno('SELECT 1 FROM centro_hemoterapia LIMIT 1')) await sembrar();
@@ -72,6 +74,7 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
 app.listen(PUERTO, () => {
   console.log(`API HEMORED escuchando en http://localhost:${PUERTO}`);
+  console.log(`Correo: ${modoCorreo() === 'SMTP' ? 'SMTP configurado' : 'sin SMTP, se guarda en data/correos/'}`);
 });
 
 // Chequeo programado del Monitor de Stock (CU05), además del disparo por cada actualización.
@@ -82,3 +85,8 @@ const chequearTodo = () => {
 };
 setTimeout(chequearTodo, 2_000);
 setInterval(chequearTodo, 60 * 60_000);
+
+// Recordatorios de turno por correo (24 o 48 h antes, según la preferencia del donante).
+const recordar = () => enviarRecordatorios().catch((e) => console.error('Recordatorios de turno:', e));
+setTimeout(recordar, 5_000);
+setInterval(recordar, 15 * 60_000);
